@@ -1,0 +1,68 @@
+
+<div class="container">
+	<div class="row">
+		<div class="jumbotron text-center">
+			<h1>Agendamento automático</h1>
+			<p>Entendendo e configurando</p>
+		</div>
+		<h5><span class="glyphicon glyphicon-time"></span> Rodrigo Pires, 12 Outubro, 2016.</h5>
+		<div id="section1" class="col-sm-9">
+			<h2><span class="label label-primary">Entendendo</span></h2>
+			<hr>
+			<p>O Agendamento Automático é um processo de pegar a fila de espera e agendar automáticamente em uma vaga livre, conforme os parâmetros da fila de espera e da vaga. Este processo se divide em 3 etapas:</p>
+
+			<div ng-controller="AgendAutomaticoEtapaCtrl as agend">
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" role="tablist" >
+					<li role="presentation" data-ng-class="{active: agend.tab == 'Etapa1'}"><a href="#agendamento_automatico/Etapa1" ng-click="agend.setTab('Etapa1')" aria-controls="home" role="tab" data-toggle="tab">1 Etapa</a></li>
+					<li role="presentation" data-ng-class="{active: agend.tab == 'Etapa2'}"><a href="#agendamento_automatico/Etapa2" ng-click="agend.setTab('Etapa2')" aria-controls="profile" role="tab" data-toggle="tab">2 Etapa</a></li>
+					<li role="presentation" data-ng-class="{active: agend.tab == 'Etapa3'}"><a href="#agendamento_automatico/Etapa3" ng-click="agend.setTab('Etapa3')" aria-controls="messages" role="tab" data-toggle="tab">3 Etapa</a></li>
+				</ul>
+
+				<!-- Tab panes -->
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="Etapa1" data-ng-class="agend.showTag('Etapa1')">
+						<br>
+						<p>
+						<h4><span class="label label-danger"> Atualização da Fila de Espera</span></h4>
+						</p>
+						<p>
+							O primeiro processo é o de atualização da fila de espera. Este processo pega todas as filas de espera da agenda regulada e da agenda local de um período de 3 dias a contar da data de ontem. As filas da data de hoje não entram no processo executado de hoje, só no de amanhã.
+							Estas filas selecionadas já estão agendadas em uma vaga e o processo inativa as mesmas no banco de dados, trocando o status da fila por inativo. Este statu fica na tabela TB_FILA_ESPERA e ao trocar o status o mesmo cria um log na tabela de TB_FILAESPERA_HISTORICO.
+						</p>
+						<p>
+							Após a conclusão da inativação da fila de espera local e regulada, o mesmo processo é feito para as as filas de espera das vagas do estado. Para o estado é feita uma consulta pegando as vagas livres do estado dos últimos 3 dias e para cada vaga encontrada,
+							é pego a especialidade e o procedimento do estado é feita uma consulta para encontrar a especialidade e o procedimento municipal. Existe uma tabela onde se configura este de para. Para o de para de especialidade podemos encontrar o par referênte na tabela
+							TB_NVA_ESPEC_DEPARA e para o procedimento TB_NVA_PROC_DEPARA.
+						</p>
+						<p>
+							Este relacionamento é de muitos para muitos, ou seja, uma ou mais especialidades ou procedimentos do estado possui uma ou mais especialidades ou procedimentos municipais. Caso retorne mais de uma
+							linha no processo de inativação o mesmo não é feito e o sistema passa para a próxima vaga e volta a executar o mesmo processo. Se o processo encontrar apenas um resultado, o processo contínua e busca uma lista de filas de espera com a data da vaga,
+							o paciente e a especialidade e ou procedimento de de para que ele encontrou na pesquisa anterior. Se a consulta retornar uma única linha o processi de inativação é executado. Caso retorne mais de uma linha o processo não é executado porque não tem como saber qual fila de espera inativar.
+						</p>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="Etapa2" data-ng-class="agend.showTag('Etapa2')">
+						<br>
+						<p>
+						<h4><span class="label label-danger"> Cancelamento de todos os agendamentos automático expirados</span></h4>
+						</p>
+						<p>O segundo processo trata de cancelar todos os agendamentos automático que não foram confirmados no prazo.</p>
+						<p>Quando fazemos um agendamento regulado, pegamos uma vaga e um paciente e os associamos, criando assim um atendimento.</p>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="Etapa3" data-ng-class="agend.showTag('Etapa3')">
+						<br>
+						<p>
+						<h4><span class="label label-danger"> Agendamento de todas as Filas de Espera nas vagas livres</span></h4>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="section2" class="col-sm-9">
+			<h2><span class="label label-primary">Configurando</span></h2>
+			<hr>
+			<p>Food is my passion. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+			<br><br>
+		</div>
+	</div>
+</div>

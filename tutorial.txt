@@ -1,0 +1,3 @@
+http://www.hongkiat.com/blog/angularjs-tools/
+
+http://www.devmedia.com.br/rotas-em-angularjs-criando-transicao-de-paginas-dinamicas-com-ngroute/34556

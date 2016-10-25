@@ -1,0 +1,51 @@
+<!--<div ng-include="'views/_include/_nav.html'"></div>-->
+
+<div class="container">
+    <div class="row">
+        <div class="jumbotron text-center">
+            <h1>Documentação SIGA</h1>
+            <p>Regras de Negócio</p>
+        </div>
+        <h5><span class="glyphicon glyphicon-time"></span> Rodrigo Pires, 12 Outubro, 2016.</h5>
+        <p>Está documentação tem por finalidade explicar algumas regras de negócio e algumas dependências técnicas para a execução de alguns processos.</p>
+        <p>O quadro abaixo informa quais são estas regras de negócios tratadas aqui. Estas podem ser acessadas pelo menu <span class="label label-danger"> Regras de Negócios</span>
+
+        <div class="jumbotron ">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default btn-danger">Agendamento Automárico</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary">Apac</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-success">Bolsa Familía - Arquivo de Impostação</button>
+                </div>
+            </div>
+            <br>
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default btn-info">CMC</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning">MPI</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default">Obito</button>
+                </div>
+            </div>
+            <br>
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default btn-success">Sisprenatal</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default">Vagas</button>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-danger">Conexa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

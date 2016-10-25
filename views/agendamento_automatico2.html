@@ -1,0 +1,158 @@
+<!--<div ng-include="'views/_include/_nav.html'"></div>-->
+<div class="container">
+    <div class="row">
+        <div class="jumbotron text-center">
+            <h1>Agendamento automático</h1>
+            <p>Entendendo e configurando</p>
+        </div>
+
+        <div id="section1" class="col-sm-9">
+            <h2><span class="label label-primary">Entendendo</span></h2>
+            <hr>
+            <p>O Agendamento Automático é um processo de pegar a fila de espera e agendar automáticamente em uma vaga livre, conforme os parâmetros da fila de espera e da vaga. Este processo se divide em 3 etapas:</p>
+
+
+            <ul class="nav nav-tabs" role="tablist" >
+                <li role="presentation" ng-class="{active: etapa == 'Etapa1'}"><a href="#agendamento_automatico/Etapa1" aria-controls="home" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> 1 Etapa</a></li>
+                <li role="presentation" ng-class="{active: etapa == 'Etapa2'}"><a href="#agendamento_automatico/Etapa2" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> 2 Etapa</a></li>
+                <li role="presentation" ng-class="{active: etapa == 'Etapa3'}"><a href="#agendamento_automatico/Etapa3" aria-controls="messages" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> 3 Etapa</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="" id="Etapa1" ng-show="etapa == 'Etapa1'">
+                    <br>
+                    <p>
+                        <h4><span class="label label-danger"> Atualização da Fila de Espera</span></h4>
+                    </p>
+                    <p>
+                        O primeiro processo é o de atualização da fila de espera. Este processo pega todas as filas de espera da
+                        agenda regulada e da agenda local de um período de 3 dias a contar da data de ontem. As filas da data de
+                        hoje não entram no processo executado de hoje, só no de amanhã.
+                        Estas filas selecionadas já estão agendadas em uma vaga e o processo inativa as mesmas no banco de dados,
+                        trocando o status da fila por inativo. Este statu fica na tabela <span class="label label-info">TB_FILA_ESPERA</span>
+                        e ao trocar o status o mesmo cria um log na tabela de <span class="label label-warning">TB_FILAESPERA_HISTORICO.</span>
+                    </p>
+                    <p>
+                        Após a conclusão da inativação da fila de espera local e regulada, o mesmo processo é feito para as as filas de espera das
+                        vagas do estado. Para o estado é feita uma consulta pegando as vagas livres do estado dos últimos 3 dias e para cada vaga encontrada,
+                        é pego a especialidade e o procedimento do estado é feita uma consulta para encontrar a especialidade e o procedimento municipal.
+                        Existe uma tabela onde se configura este de para. Para o de para de especialidade podemos encontrar o par referênte na tabela
+                        <span class="label label-warning">TB_NVA_ESPEC_DEPARA</span> e para o procedimento <span class="label label-warning">TB_NVA_PROC_DEPARA</span>.
+                    </p>
+                    <p>
+                        Este relacionamento é de muitos para muitos, ou seja, uma ou mais especialidades ou procedimentos do estado possui uma ou mais especialidades ou
+                        procedimentos municipais. Caso retorne mais de uma linha no processo de inativação o mesmo não é feito e o sistema passa para a próxima vaga e volta a
+                        executar o mesmo processo. Se o processo encontrar apenas um resultado, o processo contínua e busca uma lista de filas de espera com a data da vaga,
+                        o paciente e a especialidade e ou procedimento de de para que ele encontrou na pesquisa anterior. Se a consulta retornar uma única linha o processi de
+                        inativação é executado. Caso retorne mais de uma linha o processo não é executado porque não tem como saber qual fila de espera inativar.
+                    </p>
+                </div>
+                <div role="tabpanel" class="" id="Etapa2" ng-show="etapa == 'Etapa2'">
+                    <br>
+                    <p>
+                        <h4><span class="label label-danger"> Cancelamento de todos os Agendamentos Automático expirados</span></h4>
+                    </p>
+                    <p>
+                        O segundo processo trata de cancelar todos os agendamentos automático que não foram confirmados no prazo.
+                        Quando fazemos um agendamento regulado, pegamos uma vaga e um paciente e os associamos, criando assim um atendimento.
+                        Este processo busca uma lista de atendimentos onde os mesmos foram agendados pelo Agendamento Automático
+                        <span class="label label-warning">(Apontado pela flag FL_AGD_AUTO da tabela TB_ATENDIMENTO)</span> e não foram confirmados
+                        <span class="label label-warning">(Campo FL_AGD_AUTO_CONF)</span> até a data de limite <span class="label label-warning">(Campo DH_LIMITE)</span>
+                        form menor que hoje e o status <span class="label label-warning">(Campo ST_ATEND)</span> do atendimento for igual a
+                        <span class="label label-warning">(M - Marcado)</span>
+                    </p>
+                    <p>
+                        Depois que o processo recupera a lista, é adicionado para cada item um motivo de cancelamento, que neste caso é <span class="label label-warning">Não confirmado até a data limite</span>,
+                        depois é atualizado o status do atendimento para cancelado e é verificado se a flag de reativar a fila de espera está ativada <span class="label label-warning">(Referênciada pela tabela TB_MOTIVO_CANCELAMENTO_AGD na coluna FL_REATIVAR_FE)</span>,
+                        caso a mesma esteja ativada a fila de espera desta pessoa é reativada. Para está reativação é feito um update na tabela <span class="label label-warning">TB_FILA_ESPERA</span> na coluna <span class="label label-warning">ST_ATEND para A</span>,
+                        em seguida é criado um registro na tabela de histórico da fila de espera.
+                    </p>
+                </div>
+                <div role="tabpanel" class="" id="Etapa3" ng-show="etapa == 'Etapa3'">
+                    <br>
+                    <p>
+                        <h4><span class="label label-danger"> Agendamento de todas as Filas de Espera nas vagas livres.</span></h4>
+                    </p>
+                    <p>
+                       O terceiro e último processo é o do agendamento automático. Este processo inicia-se buscando todos os grupos na tabela <span class="label label-warning">TB_FE_GRUPO_CONF_AGD_AUTO</span>,
+                       onde o nome do <span class="label label-warning">DS_NODE</span> é igual ao node que foi recebido como parâmetro do arquivo de configuração do quarts, mencionado na Configurando.
+                       Caso não exista nenhum grupo configurado o processo é finalizado. Ao encontrar o grupo configurado o processo resgata a quantidade de threads configurado no arquivo <span class="label label-warning">properties-service.xml</span>
+                        que se encontra no diretório de instalação do jboss <span class="label label-warning">{JBOSS}/jboss-eap-4.3/jboss-as/server/siga-node/deploy-app</span>, dentro do arquivo procurar pela chave
+                        <span class="label label-warning">QTD_THREAD_AGENDAMENTO_AUTOMATICO</span>. Caso etá chave não exista o processo utilizará uma quantidade default que é 6, onde a mesma está fixada no código.
+                        Depois é verificado se a quantidade de threads é menor que a quantidade de grupos, caso afirmativo o processo iguala a quantidade de threads a quantidade de grupos.
+                    </p>
+                    <p>
+                        Após a configuração das threads o processo cria uma configuração em memória para o agendamento, buscando os parâmetros <span class="label label-warning">CARENCIA, PRAZO_CONFIRMACAO, AGD_AUTO_ATIVADO, DATA_LIMITE na tabela TB_PARAMETRO_SIS</span>
+                        e para cada grupo que ele recuperou na etapa anterior, ele cria um objeto chamado <span class="label label-warning">AgendadorAutomaticoFilaEspera</span>, onde dentro dele é setado as informações desta nova configuração e o grupo ao qual ele pertence.
+                        Em seguida este objeto é adicionado em uma thread para fazer a execução do processo em pararelo. Quando cada thread é invocada, o método run do objeto <span class="label label-warning">AgendadorAutomaticoFilaEspera</span> é executado. Nesta execução
+                        primeiramente é verificado se o horário <span class="label label-warning">que está fixado no código como 7</span> não confere com o horário atual e se o dia da semana não é sábado ou domingo. Depois de conferido os dias e os horários permitidos para a
+                        execução , buscamos uma lista de Filas de espera a serem agendadas. Esta busca se encontra no arquivo <span class="label label-warning">FilaEsperaVO.xml</span> onde a query possui o id <span class="label label-warning">CONSULTA_FILA_ESPERA_ESPEC_PROC_PERMITIDO_AGD_AUTO</span>.
+                        Logo após está consulta verificamos na configuração se o processo de agendamento automático está desativado ou se a lista de Filas de espera está vazia, caso um das opções seja verdadeiras o processo é finalizado.
+                    </p>
+                    <p>
+                        Continuando o fluxo de validação, existe uma lista de filas a serem ignoradas pelo processo, que inicialmente está vazia, mas é preenchida conforme o processo avança. A chave utilizada para se conhecer a fila é:
+                        O id da atividade profissional, id do procedimento, id do estabelecimento saúde e o perfil da agenda. Juntas estas informações formam a chave de pesquisa para está lista de Filas de espera ignoradas.
+                        Para cada fila de espera encontrada verificamos se ela está contida na lista de ignoradas, caso positivo o processo volta e pega a próxima. Se a mesma não estiver na fila de ignoradas o processo então verifica em um cache de vagas se existe alguma vaga que bata com o paciente e com o protocolo,
+                        caso positivo, ela é adicionada a vaga e o paciente em uma lista de agendamentos <span class="label label-warning">paciente e vagas que bateram</span>, se o processo não encontrar nenhuma vaga para o paciente desta fila, o mesmo é adicionado em uma lista de pendentes. Existe uma busca
+                        de vagas com os parâmetros do paciente, fila de espera, especialidade e procedimento. Caso está busca não retorne nada, a fila de espera é adicionada na lista de ignoradas.
+                    </p>
+                    <p>
+                        Depois de percorrido toda a lista de Filas de Espera, o processo tenta procurar novamente vagas para as filas que se encontram na lista de pendentes. No final ele pega a lista de vagas com paciente e fila de espera e agenda os mesmos finalizando todos o processo.
+                    </p>
+                </div>
+            </div>
+            <h2><span class="label label-primary">Configurando o processo de Agendamento Automático</span></h2>
+            <hr>
+            <p>
+                Para a execução deste processo é necessário adicionar algumas configurações no arquivo quarts-jobs.xml. Vá até o diretório de instalação do jboss abra o arquivo quarts-jobs.xml no diretório {JBOSS}/jboss-as/server/siga-node/conf. Dentro dele encontraremos vários jobs configurados, para este processo funcionar
+                deve ter um job com a classe <span class="label label-warning"> cesar.datasussisreg.service.filaespera.AutomacaoFilaEsperaJob </span>. Neste job devemos ter uma tag chamada <span class="label label-warning">'<'job-data-map'\>'</span>, nela deve estar configurado o nome do grupo a ser executado conforme exemplo abaixo:
+            </p>
+            <p>
+                <div class="jumbotron ">
+                    <'job-data-map><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'entry><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'key>NODE<'/KEY><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'value>SERVIDOR_1<'/value><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'/entry><br>
+                    <'/job-data-map>
+                </div>
+            </p>
+            <p>
+                Notem que existe uma chave e um valor nesta configuração. Na chave sempre devemos passar <span class="label label-warning">NODE</span>, porque a aplicação espera receber um parâmetro com esta chave, já o nome do servidor é configurado na tabela <span class="label label-warning">TB_FE_GRUPO_CONF_AGD_AUTO</span>,
+                o nome deve estar na coluna <span class="label label-warning">DS_NODE</span>. As duas configurações devem bater, tanto o valor do parâmetro do job como o nome na tabela mencionada. Também devemos nos atentar por outra tag importante que pe a <'cron-expression>, nela é configurado de quanto em quanto tempo este job será executado.
+                Vejamos um exemplo do job completo abaixo.
+            </p>
+            <p>
+                <div class="jumbotron ">
+                    <'job><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'job-detail><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'name>AutomacaoFilaEsperaJob<'/name><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'group>AutomacaoFilaEsperaJob<'/group><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-class>cesar.datasussisreg.service.filaespera.AutomacaoFilaEsperaJob<'/job-class><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-data-map><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'entry><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'key>NODE<'/key><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'value>SERVIDOR_1<'/value><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/entry><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/job-data-map><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'/job-detail><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'trigger><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'cron><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'name>AutomacaoFilaEsperaJob<'/name><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'group>AutomacaoFilaEsperaJob<'/group><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-name>AutomacaoFilaEsperaJob<'/job-name><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-group>AutomacaoFilaEsperaJob<'/job-group><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'cron-expression>0 0/2 * * * ? *<'/cron-expression><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/cron><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<'/trigger><br>
+                    <'/job><br>
+                </div>
+            </p>
+            <p>
+                Feita ou verificada toda essa configuração, é necessário reiniciar o servidor de aplicação para que o job comece a ser executado.
+            <div class="alert alert-danger" role="alert">Mas ele somente é executado. Para que todo o processo de <span class="label label-warning">Agendamento Automático</span> funcione é necessário verificar as outras configurações de dia e horário mencionados nas Etapas 1, 2 e 3.</div>
+            </p>
+        </div>
+    </div>
+</div>

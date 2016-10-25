@@ -1,0 +1,936 @@
+<div class="container">
+    <div class="row">
+        <div class="jumbotron text-center">
+            <h1>Apac</h1>
+            <p>Preenchimento e Avaliação de Laudo Apac</p>
+        </div>
+
+        <div id="section1" class="col-sm-9">
+            <h2><span class="label label-primary">Entendendo</span></h2>
+            <hr>
+            <p>
+                A Apac é uma categorizão de procedimentos de auto custo. Nesta documentação iremos abordar do processo e entendimento do preenchimento e da avaliação dos laudos de Apac.
+                Selecione o menu abaixo para cada tipo.
+            </p>
+            <ul class="nav nav-tabs" role="tablist" >
+                <li role="presentation" ng-class="{active: funcionalidade == 'preenchimento'}"><a href="#apac/preenchimento/query" aria-controls="home" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> Preenchimento</a></li>
+                <li role="presentation" ng-class="{active: funcionalidade == 'avalidacao'}"><a href="#apac/avalidacao/query" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> Avaliação</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="" id="preenchimento" ng-show="funcionalidade == 'preenchimento'">
+                    <br>
+                    <p>
+                        <h4><span class="label label-danger"> Preenchimento de Laudo Apac</span></h4>
+                    </p>
+                    <p>
+                        O processo de preenchimento de laudo apac começa com a validação dos campos preenchidos na tela, depois ele válida o tipo de profissional <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Validação de Profissional'">(1)</span>,
+                        caso está validação falhe é apresentada uma mensagem na tela ou se a validação não apresentar error seram criadas uma lista com validadores.
+                        Antes de executar os validadores é criado um objeto do tipo ProcedimentoVigenciaInvalidaMensagemHelper onde o mesmo recebe uma lista de procedimentos que não estão vigentes. Está pesquisa é feita com os ids dos procedimentos selecionados na tela
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Procedimentos não vigentes'">(2).</span>
+                        Depois é criado um objeto de validação chamado ValidacaoBPALaudoApac e depois é chamada esta validação. Dentro desta classe, adicionamos 2 validadores. O primeiro é o ValidadorConsistenciasBPAProcedimentoSexo e o segundo é o ValidadorConsistenciasBPAProcedimentosIdade.
+                        Estes validadores são do tipo ValidadorTiposConsistenciasBPA. Depois da adição destes dois validadores, acionamos a validação desta classe  ValidadorTiposConsistenciasBPA. No método de validação ele pega a lista de procedimentos que foi preenchida na tela e monta uma lista de ids de cada procedimento.
+                        Com está lista pronta o mesmo monta um in com os ids dos procedimentos e chama uma query para pesquisar estes procedimentos
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Procedimentos'">(3).</span> Ele guarda o resultado em uma variável para uso posterior.
+                        Depois ele executa uma nova query para pegar o paciente e o sexo do mesmo <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca paciente e o sexo'">(4)</span> e guarda o resultado em uma variável para uso posterior.
+                    </p>
+                    <p>
+                        Neste ponto o mesmo faz uma iteração nos validadores. Para cada validador ele verifica se é do tipo de ValidadorConsistenciasBPAProcedimentoSexo, se for ele executa mais algumas querys. A primeira delas é a busca de faixa etária
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Faixa Etária'">(5)</span> utilizando os ids dos procedimentos.
+                        A próxima é a busca da associacao de procedimento com cid <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Associação de Procedimentos com CIDs'">(6)</span>,
+                        depois buscamos os tipos de prestadores <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Tipos de prestadores'">(7)</span>,
+                        depois buscamos os estabelecimentos por tipos de prestadores <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Estabelecimentos por tipos de prestadores'">(8)</span>,
+                        depois buscamos uma lista de serviços de classificação por procedimentos <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Lista de serviço e classificação por procedimento'">(9)</span>, depois buscamos uma lista de serviços de classificação atrás
+                        dos estabelecimentos <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Serviço e classificação por estabelecimento'">(10)</span>, depois buscamos uma lista de proceidmentos, com estabelecimentos e cbos através de uma lista de procedimentos,
+                        uma lista de estabelecimentos, vigência e vínculo profissional <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Vigência e vínculo profissional'">(11)</span>, buscamos um mapa de especialidades com procedimentos
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Mapa de especialidades com procedimentos'">(12)</span> onde a chave deste mapa é o id do procedimento.
+                        Depois buscamos uma lista de procedimentos onde não exigem cbos <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Lista de procedimentos que não exigem CID'">(13)</span>.
+
+                        <div class="alert alert-danger" role="alert">
+                            Estas listas (De 5 até a 12) são inicializadas apenas uma vez. Depois de inicalizadas, o processo usa as listas que ficam em memoria e são adicionadas dentro de cada validador para serem invocadas.
+                            (Nem todas as listas inicializadas neste processo são utilizadas).
+                        </div>
+
+                        Dentro do validador ValidadorConsistenciasBPAProcedimentoSexo ele pega a lista de procedimentos que já foi inicializada anteriormente (query 3), a lista de paciente com sexo (query 4) e a lista de procedimentos da tela. Para cada procedimento da tela ele verifica se o sexo e compatível com o procedimento.
+                        Caso não seja, o mesmo adiciona uma mensagem de erro em uma lista para retorno. Depois da execução deste validador o sistema verifica se existe algum erro com os procedimentos e o sexo, caso haja, o processo é interrompido, caso não exista imcompatibilidade o sistema continua a iterar entre os validadores adicionados.
+                        O próximo validador e o ValidadorConsistenciasBPAProcedimentosIdade. Nele validamos para cada procedimento selecionado se a faixa etaria do procedimento(query 5) e compativel com a faixa etaria calculada com a idade do paciente. Caso não seja o mesmo, adicionamos uma mensagem de erro no retorno.
+                        Depois que estas validações são executadas verificamos na action se existe algum erro nelas, se existir mostramos as mensagens na tela, se não, continuamos com o processo. Novamente executamos mais validações. Na action fazemos uma iteração para cada cid selecionado.
+                        Desta vez pegamos a classe SISRegConectorAgendaUniversal e dentro dele existe um metodo chamado isCidProcedimentoPermitido que valida através de uma query se o cid é compativel com os procedimentos
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'CDI compativel com os procedimentos'">(14)</span>.
+                    </p>
+                    <p>
+                        Depois que o processo fez a validação de todos os cids X procedimentos, o memso verifica a existência de erros, se não existir nenhum erro o processo chama o método de gravar a solicitação, conforme descrito a baixo.
+                        No processo de gravação, existem mais validações (Não é possível...)
+                        Primeiramente ele faz uma consulta na view VW_MEDICO atraves do id do medico solicitante selecionado na tela, caso o retorno seja nulo e o grupo apac dentro do objeto laudo que esta sendo gravado, só pode ser preenchido por medico, ou seja, se estiver flegado como true então o processo e finalizado com uma
+                        exception e e mostrada uma mensagem na tela par o usuario.
+                        Depois existe mais uma validação que fica dentro do metodo validaTipoApacXProcedimento. Dentro dele montamos uma lista com todos os procedimentos e fazemos uma consulta <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Prodcedimentos válidos'">(15)</span>
+                        para verificar se os procedimentos são válidos para cada item da consulta. Caso os procedimentos não estejam na lista da
+                        consulta (query 14) o sistema busca assim mesmo no banco um por um cada procedimento, para adicionar a descrição de cada um em uma lista de erros. Caso a lista da (query 15) estiver nula, ele faz a busca dos procedimentos selecionados(um por um) também no banco para pegar a descrição e montar os erros(Exceptions).
+                    </p>
+                    <p>
+                        Bom continuando a onda de consultas.
+
+                        Agora ele faz uma nova consulta <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca especialidade'">(16)</span>,
+                        pegando o id do procedimento do primeiro objeto do tipo ProcedimentoLaudoMedicoVO(Verificar porque só o 1) que fica dentro do laudo(Objeto que queremos salvar), simplesmente para pegar o id da especialidade. No mesmo método ele cria novas instâncias de  ProcedimentoLaudoMedicoVO e itera sobre os que já existem,
+                        copia as informações para a nova instância e adiciona em uma lista e substitui as novas pelas antigas dentro do objeto LaudoMedicoVO(Não faz sentido criar novas instancias).
+                        Neste trecho olhamos uma flag que vem da tela chamada de alteraProntuario. Caso esta flag venha marcada, buscamos o prontuário do paciente <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Prontuário do paciente'">(17)</span>
+                        e se o objeto existir, fazemos outra consulta pelo id agora buscando o ejb e alterando algumas informações. Se o objeto não estiver cadastrado então criamos uma instância do mesmo e o persistimos.
+
+                        Finalmente no gravar(Eeeebaaaaa).
+
+                        O processo verifica qual o tipo de laudo ele esta tentando salvar e para cada tipo ele instância um objeto diferente, mas que referência a mesma tabela. As informacoes são as mesmas para todos, só mudando uma propriedade que ele pega do laudo que está vindo.
+                        Os tipos são eles:
+                        Geral, radio, quimio e audio.
+                        Depois de criado o objeto o mesmo é salvo no banco.
+                        Mas antes de terminar o processo, adivinha o que ele vai fazer por último. É isso mesmo, uma validação.
+                        Por último ele faz uma validação pegando o objeto que estava vindo para ser salvo, mas este que ele valida não é o objeto persistido. (Lembra que ele instância outros objetos comentado acima e tranporta a informação para estes novos objetos). Bom antes de validar ele olha se está vindo a flag de validar LaudoPendente vindo do request(Alguém envia isso).
+                        Caso sim ele executa uma consulta <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Laudos pendentes'">(18)</span> que se retornar algum laudo pendente ele levanta uma exceção chamada LaudoApacPendenteException e faz rollback de tudo que ele fez até agora.
+                    </p>
+                    <h2><span class="label label-primary">Querys</span></h2>
+                    <hr>
+                    <p>
+                        Nesta sessão iremos apresentar todas as querys executadas neste processo. Selecione no combobox a query desejada.
+                    </p>
+                    <p>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                Selecionar Query
+                                <span class="caret" />
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-class="{active: query == 'query1'}"><a href="#apac/preenchimento/query1"><span class="label label-primary glyphicon glyphicon-tag">(1)</span> Validação de Profissional</a></li>
+                                <li ng-class="{active: query == 'query2'}"><a href="#apac/preenchimento/query2"><span class="label label-primary glyphicon glyphicon-tag">(2)</span> Procedimentos não vigentes</a></li>
+                                <li ng-class="{active: query == 'query3'}"><a href="#apac/preenchimento/query3"><span class="label label-primary glyphicon glyphicon-tag">(3)</span> Procedimentos e Sexo</a></li>
+                                <li ng-class="{active: query == 'query4'}"><a href="#apac/preenchimento/query4"><span class="label label-primary glyphicon glyphicon-tag">(4)</span> Busca paciente e o sexo</a></li>
+                                <li ng-class="{active: query == 'query5'}"><a href="#apac/preenchimento/query5"><span class="label label-primary glyphicon glyphicon-tag">(5)</span> Faixa Etária</a></li>
+                                <li ng-class="{active: query == 'query6'}"><a href="#apac/preenchimento/query6"><span class="label label-primary glyphicon glyphicon-tag">(6)</span> 'Associação de Procedimentos com CIDs</a></li>
+                                <li ng-class="{active: query == 'query7'}"><a href="#apac/preenchimento/query7"><span class="label label-primary glyphicon glyphicon-tag">(7)</span> Tipos de prestadores</a></li>
+                                <li ng-class="{active: query == 'query8'}"><a href="#apac/preenchimento/query8"><span class="label label-primary glyphicon glyphicon-tag">(8)</span> Estabelecimentos por tipos de prestadores</a></li>
+                                <li ng-class="{active: query == 'query9'}"><a href="#apac/preenchimento/query9"><span class="label label-primary glyphicon glyphicon-tag">(9)</span> Lista de serviço e classificação por procedimento</a></li>
+                                <li ng-class="{active: query == 'query10'}"><a href="#apac/preenchimento/query10"><span class="label label-primary glyphicon glyphicon-tag">(10)</span> Serviço e classificação por estabelecimento</a></li>
+                                <li ng-class="{active: query == 'query11'}"><a href="#apac/preenchimento/query11"><span class="label label-primary glyphicon glyphicon-tag">(11)</span> Vigência e vínculo profissional</a></li>
+                                <li ng-class="{active: query == 'query12'}"><a href="#apac/preenchimento/query12"><span class="label label-primary glyphicon glyphicon-tag">(12)</span> Mapa de especialidades com procedimentos</a></li>
+                                <li ng-class="{active: query == 'query13'}"><a href="#apac/preenchimento/query13"><span class="label label-primary glyphicon glyphicon-tag">(13)</span> Lista de procedimentos que não exigem CID</a></li>
+                                <li ng-class="{active: query == 'query14'}"><a href="#apac/preenchimento/query14"><span class="label label-primary glyphicon glyphicon-tag">(14)</span> CID compativel com os procedimentos</a></li>
+                                <li ng-class="{active: query == 'query15'}"><a href="#apac/preenchimento/query15"><span class="label label-primary glyphicon glyphicon-tag">(15)</span> Procedimentos válidos para um determinado grupo apac</a></li>
+                                <li ng-class="{active: query == 'query16'}"><a href="#apac/preenchimento/query16"><span class="label label-primary glyphicon glyphicon-tag">(16)</span> Busca especialidade</a></li>
+                                <li ng-class="{active: query == 'query17'}"><a href="#apac/preenchimento/query17"><span class="label label-primary glyphicon glyphicon-tag">(17)</span> Prontuário do paciente</a></li>
+                                <li ng-class="{active: query == 'query18'}"><a href="#apac/preenchimento/query18"><span class="label label-primary glyphicon glyphicon-tag">(18)</span> Laudos pendentes</a></li>
+                            </ul>
+                        </div>
+                    </p>
+                    <p>
+                        <div ng-show="query == 'query1'">
+                            <p>Na linha 1509 da classe PreenchimentoLaudoAction ele chama um método que vai no banco de dados e busca o objeto MedicoViewVO pelo id e verifica se ele é nulo.(Usado o método do vidats para pesquisa com classe).</p>
+                        </div>
+                        <div ng-show="query == 'query2'">
+                            <p>Está consulta é feita  na linha 656 da classe PreenchimentoLaudoAction, onde se chama a classe ConsultaProcedimentoSFBean na linha 326, query a baixo.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    select proc.id_procedimento_pk, nucleo.ds_procedimento, nucleo.cd_procedimento_sus from
+                                    tb_procedimento proc inner join
+                                    tb_nucleo_procedimento nucleo on proc.id_procedimento_pk = nucleo.id_procedimento_nucleo_pk
+                                    where ? not between proc.dh_inicio_vigencia
+                                    and proc.dh_fim_vigencia
+                                    and proc.id_procedimento_pk in (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query3'">
+                            <p>Query que faz a consulta dos ids dos procedimentos. Arquivo BPAConsolidadoVO.xml, id da consulta PROCEDIMENTO_SEXO.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT ID_PROCEDIMENTO_PK, SEXO  FROM TB_PROCEDIMENTO WHERE ID_PROCEDIMENTO_PK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query4'">
+                            <p>Query que faz a consultata do paciente com o sexo.  Arquivo BPAConsolidadoVO.xml, id da consulta PROCEDIMENTO_PACIENTE.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT T1.CD_CNS,
+                                    T1.NM_PESSOA,
+                                    T1.ID_PESSOA_PK,
+                                    T1.DT_NASCIMENTO,
+                                    T2.CD_SEXO_SUS
+                                    FROM TB_PESSOA T1,
+                                    TB_SEXO T2
+                                    WHERE
+                                    T1.ID_SEXO_FK  = T2.ID_SEXO_PK
+                                    AND T1.ID_PESSOA_PK = ?
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query5'">
+                            <p>Query que busca a faixa etária.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    ID_PROCEDIMENTO_PK,
+                                    NR_IDADE_MINIMA,
+                                    NR_IDADE_MAXIMA
+                                    FROM
+                                    TB_PROCEDIMENTO
+                                    WHERE
+                                    ID_PROCEDIMENTO_PK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query6'">
+                            <p>Query que busca associação com procedimento com cid.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT ID_PROCEDIMENTO_FK, ID_CID_FK
+                                    FROM TB_PROCEDIMENTO_CID
+                                    WHERE ID_PROCEDIMENTO_FK IN (?)
+                                    AND ? >= DH_INICIO_VIGENCIA AND ? <= DH_FIM_VIGENCIA
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query7'">
+                            <p>Query que busca os tipos de prestadores.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT ID_PROCEDIMENTO_FK, ID_TIPO_PRESTADOR_FK FROM
+                                    TB_PROCED_TIPO_PRESTADOR
+                                    WHERE ID_PROCEDIMENTO_FK IN (?)
+                                    AND ? >= DH_INICIO_VIGENCIA
+                                    AND ? <= DH_FIM_VIGENCIA
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query8'">
+                            <p>Query que busca estabelecimentos por tipos de prestadores.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT  A.ID_ESTABELECIMENTO_SAUDE_PK , B.ID_TIPO_PRESTADOR_PK
+                                    FROM TB_ESTABELECIMENTO_SAUDE A, TB_TIPO_PRESTADOR B
+                                    WHERE A.ID_RETENCAO_TRIBUTOS_FK = B.ID_RETENCAO_TRIBUTOS_FK
+                                    AND A.ID_ESTABELECIMENTO_SAUDE_PK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query9'">
+                            <p>Query que busca servicos de classificao por procedimentos.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT ID_PROCEDIMENTO_FK, ID_SERV_CLASSIFIC_FK
+                                    FROM TB_PROCED_SERVICO_CLASSIF
+                                    WHERE ID_PROCEDIMENTO_FK IN (?)
+                                    AND ? >= DH_INICIO_VIGENCIA
+                                    AND ? <= DH_FIM_VIGENCIA
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query10'">
+                            <p>Query que busca servicos de classificacao atraves de estabelecimentos.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT B.ID_SERV_CLASSIFIC_PK, A.ID_ESTABELECIMENTO_SAUDE_FK, B.DS_CLASSIFICACAO
+                                    FROM TB_SERV_CLASSIFIC_ESTBL A
+                                    ,TB_SERVICO_CLASSIFICACAO B WHERE
+                                    B.ID_SERV_CLASSIFIC_PK =  A.ID_CLASSIFIC_FK
+                                    AND  A.ID_ESTABELECIMENTO_SAUDE_FK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query11'">
+                            <p>Query que busca a vigência e o vínculo do profissional.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    V.ID_ESTABELECIMENTO_SAUDE_FK ||'-'|| O.ID_PESSOA_FK ||'-'||P.ID_PROCEDIMENTO_FK AS ESTAB_PROFS_PROCED,
+                                    C.CD_CBO_SUS, S.CD_CNS
+                                    FROM
+                                    TB_VINCULO_PROFIS_SAUDE V,
+                                    TB_OCUPACAO_PROFIS_SAUDE O,
+                                    TB_CBO C,
+                                    TB_PROCEDIMENTO_CBO P,
+                                    TB_PESSOA S
+                                    WHERE
+                                    V.ID_OCUPACAO_PROFIS_SAUDE_FK = O.ID_OCUPACAO_PROFIS_SAUDE_PK AND
+                                    O.ID_CBO_FK=C.ID_CBO_PK  AND
+                                    C.ID_CBO_PK=P.ID_CBO_FK AND
+                                    O.ID_PESSOA_FK = S.ID_PESSOA_PK
+                                    AND P.ID_PROCEDIMENTO_FK IN
+                                    AND V.ID_ESTABELECIMENTO_SAUDE_FK IN  ()
+                                    AND ? >= P.DH_INICIO_VIGENCIA
+                                    AND ? <= P.DH_FIM_VIGENCIA
+                                    AND V.ID_VINCULO_PROFIS_SAUDE_PK = ?
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query12'">
+                            <p>Query que busca uma lista de especialidades por procedimentos.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    ID_PROCEDIMENTO_FK , ID_ATIVIDADE_PROFISSIONAL_FK
+                                    FROM
+                                    TB_PROCEDIMENTO_ATIV_PROF
+                                    WHERE
+                                    ID_ATIVIDADE_PROFISSIONAL_FK IS NOT NULL
+                                    AND
+                                    ID_PROCEDIMENTO_FK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query13'">
+                            <p>Busca uma lista de procedimentos onde não exigem CIDs.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT PRO.ID_PROCEDIMENTO_PK,
+                                    NUC.CD_PROCEDIMENTO_SUS,
+                                    NUC.DS_PROCEDIMENTO
+                                    FROM TB_PROCEDIMENTO PRO INNER JOIN
+                                    TB_NUCLEO_PROCEDIMENTO NUC ON PRO.ID_PROCEDIMENTO_NUCLEO_FK = NUC.ID_PROCEDIMENTO_NUCLEO_PK INNER JOIN
+                                    TB_PROCEDIMENTO_DETALHE PDE ON PRO.ID_PROCEDIMENTO_PK = PDE.ID_PROCEDIMENTO_FK INNER JOIN
+                                    TB_DETALHE DET ON PDE.ID_DETALHE_FK = DET.ID_DETALHE_PK
+                                    WHERE DET.CD_DETALHE_SUS = '021'
+                                    AND ? BETWEEN PDE.DH_INICIO_VIGENCIA AND PDE.DH_FIM_VIGENCIA
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query14'">
+                            <p>Valida se os cids são compativeis com os procedimentos.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT ID_CID_FK FROM TB_PROCEDIMENTO_CID
+                                    WHERE ID_PROCEDIMENTO_FK = ?
+                                    AND IN_SITUACAO_REGISTRO = 'A'
+                                    AND SYSDATE BETWEEN DH_INICIO_VIGENCIA AND DH_FIM_VIGENCIA
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query15'">
+                            <p>Query que busca todos os procedimentos válidos para um determinado grupo apac.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    B.ID_PROCED_GRUPO_ANTIGO_PK AS idProcedimentoGrupoAntigo
+                                    , A.ID_PROCEDIMENTO_NUCLEO_PK AS idProcedimentoNucleo
+                                    , A.CD_PROCEDIMENTO_SUS AS codigoProcedimentoSus
+                                    , A.CD_DIGITO_VERIFICADOR AS codigoDigitoVerificador
+                                    , B.DS_PROCEDIMENTO_GRUPO AS descricaoProcedimentoGrupo
+                                    , A.DS_PROCEDIMENTO AS descricaoProcedimento
+                                    FROM TB_NUCLEO_PROCEDIMENTO A
+                                    INNER JOIN TB_PROCEDIMENTO C ON A.ID_PROCEDIMENTO_NUCLEO_PK =
+                                    C.ID_PROCEDIMENTO_NUCLEO_FK
+                                    LEFT JOIN TB_PROCEDIMENTO_GRUPO_ANT B ON A.ID_PROCED_GRUPO_ANTIGO_FK =
+                                    B.ID_PROCED_GRUPO_ANTIGO_PK
+                                    WHERE C.IN_APAC = 'S'
+                                    AND B.ID_PROCED_GRUPO_ANTIGO_PK = ?
+                                    AND A.ID_PROCEDIMENTO_NUCLEO_PK IN (?)
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query16'">
+                            <p>Query que fica dentro de ProcedimentoLaudoMedicoVO.xml id da consulta CONSULTAR_ATIVIDADE_PROFISSIONAL_BY_PROCEDIMENTO.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    select
+                                    ap.ID_ATIVIDADE_PROFISSIONAL_PK  "id_atividade_profissional",
+                                    ap.DS_ATIVIDADE_PROFISSIONAL  "ds_atividade_profissional",
+                                    ap.CD_ATIVIDADE_PROFISSIONAL_SUS "cd_atividade_profissional_sus"
+                                    from
+                                    tb_procedimento           p,
+                                    tb_nucleo_procedimento    np,
+                                    tb_atividade_profissional ap,
+                                    tb_procedimento_ativ_prof pap
+                                    where
+                                    p.ID_PROCEDIMENTO_NUCLEO_FK = np.ID_PROCEDIMENTO_NUCLEO_PK
+                                    and pap.ID_PROCEDIMENTO_FK = p.ID_PROCEDIMENTO_PK
+                                    and pap.ID_ATIVIDADE_PROFISSIONAL_FK = ap.ID_ATIVIDADE_PROFISSIONAL_PK
+                                    and np.ID_PROCEDIMENTO_NUCLEO_PK =?
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query17'">
+                            <p>Query que busca o prontuario do paciente.</p>
+                            <div class="jumbotron">
+                                <p>
+
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query18'">
+                            <p>Query que consulta algum laudo pendente.</p>
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    PES.ID_PESSOA_PK idPaciente,
+                                    PES.NM_PESSOA nomePaciente,
+                                    PES.NM_SOCIAL nomeSocial,
+                                    PES.DT_NASCIMENTO dataNascimentoPaciente,
+                                    PES.CD_CNS cnsPaciente ,
+                                    PES.CD_CPF cpfPaciente,
+                                    ESTABSOLIC.NM_FANTS nomeFantasiaEstabelecimento,
+                                    NUCLEO.DS_PROCEDIMENTO descricaoProcedimento,
+                                    ATENDPROCSOLIC.ID_ATEND_PROC_SOLIC_PK idProcedimentoLaudo,
+                                    LAUDO.ID_LAUDO_MEDICO_PK idLaudoMedico ,
+                                    STATUS.NM_STATUS nomeStatus,
+                                    (SELECT SEXO.DS_SEXO FROM TB_SEXO SEXO WHERE SEXO.ID_SEXO_PK = PES.ID_SEXO_FK) dsSexoPaciente
+                                    FROM
+                                    TB_PESSOA                PES
+                                    INNER JOIN TB_LAUDO_MEDICO  LAUDO         ON ( LAUDO.ID_PACIENTE_FK = PES.ID_PESSOA_PK)
+                                    INNER JOIN TB_GRUPO_APAC            GRUPO ON GRUPO.CD_GRUPO_APAC_PK = LAUDO.CD_GRUPO_APAC_FK
+                                    INNER JOIN TB_ESTABELECIMENTO_SAUDE ESTABSOLIC ON ESTABSOLIC.ID_ESTABELECIMENTO_SAUDE_PK = LAUDO.ID_ESTAB_SAUDE_SOLIC_FK
+                                    INNER JOIN TB_ATEND_PROC_SOLIC      ATENDPROCSOLIC ON ATENDPROCSOLIC.ID_LAUDO_MEDICO_FK = LAUDO.ID_LAUDO_MEDICO_PK
+                                    INNER JOIN TB_PROCEDIMENTO          PROC   ON PROC.ID_PROCEDIMENTO_PK  = ATENDPROCSOLIC.ID_PROCEDIMENTO_FK
+                                    INNER JOIN TB_NUCLEO_PROCEDIMENTO   NUCLEO ON NUCLEO.ID_PROCEDIMENTO_NUCLEO_PK = PROC.ID_PROCEDIMENTO_NUCLEO_FK
+                                    INNER JOIN TB_STATUS_PROCEDIMENTO   STATUS ON STATUS.CD_STATUS_PK = ATENDPROCSOLIC.CD_STATUS_FK
+                                    WHERE
+                                    (
+                                    (
+                                    (
+                                    (
+                                    (
+                                    (
+                                    ( (PES.ID_PESSOA_PK = #1 ) AND (STATUS.CD_STATUS_PK IN ( #2 ) ) )
+                                    AND
+                                    (
+                                    (ATENDPROCSOLIC.DH_INICIO_VALIDADE <= SYSDATE )
+                                    AND (ATENDPROCSOLIC.DT_FIM_VALIDADE >= SYSDATE )
+                                    )
+                                    )
+                                    AND (ATENDPROCSOLIC.ID_PROCEDIMENTO_FK IN ( #3 ) )
+                                    )
+                                    )
+                                    OR
+                                    (
+                                    (
+                                    (
+                                    (PES.ID_PESSOA_PK = #4 )
+                                    AND (STATUS.CD_STATUS_PK IN ( #5 )  )
+                                    )
+                                    AND (ATENDPROCSOLIC.ID_PROCEDIMENTO_FK IN ( #6 ) )
+                                    )
+                                    )
+                                    )
+                                    )
+                                    )
+                                </p>
+                            </div>
+                        </div>
+                    </p>
+                </div>
+                <div role="tabpanel" class="" id="avalidacao" ng-show="funcionalidade == 'avalidacao'">
+                    <br>
+                    <p>
+                        <h4><span class="label label-danger"> Avalidação de Laudo Apac</span></h4>
+                    </p>
+                    <p>
+                        Ao preencher a tela de avaliação de apac, o mesmo submete o formulário a validações. A primeira delas é, se o status é igual
+                        a <code>STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO</code> e executa uma consulta
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca procedimentos não vigentes'">(1)</span>
+                        e pega o resultado e instancia um objeto chamado <code>ProcedimentoVigenciaInvalidaMensagemHelper</code>.
+                        Esse objeto é encarregado de montar a mensagem de erro caso exista alguma informação passada pela query.
+                        Se o status for <code>STATUS_AVALIACAO_PROCEDIMENTO_REJEITADO</code>, o processo pega o motivo da rejeição preenchida na tela e cria uma exception e mostra o erro na tela.
+                        Se o último status for de <code>STATUS_AVALIACAO_PROCEDIMENTO_EM_AVALIACAO</code> ele não levanta erro nenhum e se o status não tiver
+                        sido preenchido ele levanta uma exception de erro de preenchimento de status. Se na validação nenhum erro foi encontrado então ele
+                        pula para o próximo passo, que é consultar uma lista de trabalho no banco
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca uma lista de trabalho'">(2)</span>,
+                        com essa lista ele pega um numero de lock do
+                        request e verifica se o numero é diferente para todos os itens da lista de trabalho, caso algum seja diferente o mesmo levanta
+                        uma exception mostrando uma mensagem na tela. Se tudo estiver bem ele chama o método de gravar do ejb.
+                        No método de gravar antes de persistir, o mesmo faz algumas validações que estam logo a baixo:
+                    </p>
+                    <h2><span class="label label-primary">Validações</span></h2>
+                    <hr>
+                    <p>
+                        <span class="label label-primary ">1</span> Verifica se o médico é autorizador.
+                        <p>
+                            Na primeira validação, é feita uma consulta no banco para ver se o medico e um autorizador.
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca médico autorizador'">(3)</span>
+                            Se a consulta não retornar linhas o processo levanta uma exception do tipo <code>MedicoStatusException</code> e uma mensagem é mostrada na tela.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">2</span> Verifica status e procedimentos.
+                        <p>
+                            Se o processo continuar sera feita uma outra validação de ação com status.
+                            Ele pega a lista de procedimentos para ser avaliada e para cada item ele busca o procedimento no banco de dados
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de procedimentos'">(4)</span>,
+                            pega a ação correspondente ao procedimento e pega o status atual do procedimento. A verificação é feita da seguinte forma.
+                            Se a ação estiver dentro das ações abaixo o processo levanta uma exception do tipo <code>LaudoMedicoComStatusAlteradoException</code> e mostra uma mensagem na tela.
+                        </p>
+                        <p>
+                            <code>
+                                STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_REJEITADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_EM_AVALIACAO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_CANCELADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_EM_AVALIACAO_CANCELAMENTO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_EM_REALIZACAO <br>
+                            </code>
+                        </p>
+                        <p>
+                            E se o status do procedimento estiver dentro dos status a baixo:
+                        </p>
+                        <p>
+                            <code>
+                                STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_REJEITADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_SOLICITADO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_EM_REALIZACAO <br>
+                                STATUS_AVALIACAO_PROCEDIMENTO_CANCELADO <br>
+                            </code>
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">3</span> Verifica se algum procedimento já foi agendado.
+                        <p>
+                        Com a continuação do código sem dar nenhum erro, agora ele verifica se algum procedimento já foi agendado.
+                        Para cada procedimento o mesmo reexecuta a consulta
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de procedimentos'">(4)</span>
+                        e verifica se o procedimento esta com o status igual a <code>STATUS_AVALIACAO_PROCEDIMENTO_AGENDADO</code>.
+                        Se o status for igual o processo levantando uma exception do tipo <code>LaudoMedicoComStatusAlteradoException</code>.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">4</span> Verifica a regra de laudos pendentes.
+                        <p>
+                         Depois ele verifica os procedimentos pendentes. Neste método ele itera cada procedimento e faz uma consulta no
+                         banco <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de procedimentos pendentes'">(5)</span>
+                         e caso exista alguma linha de
+                         resultado o mesmo para o processo levantando uma exception do tipo <code>LaudoApacPendenteException</code> onde é mostrada uma mensagem na tela.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">5</span> Verifica a disponibilidade de cotas.
+                        <p>
+                            Na continuação do código sem dar nenhum erro, o mesmo verifica a quantidade de cotas disponíveis para os procedimentos e grupos apac.
+                            Se dentro do objeto laudo conter o objeto <code>ComplTratamentoLaudoMedicoVO</code>, dentro dele chamamos o método <code>getTotalCamposAreasIrradiadas</code>, que fica na herança chamada
+                            <code>AbstractComplTratamentoLaudoMedico</code>. Este método itera sobre um coleção de objetos do tipo <code>TB_AREA_IRRADIADA</code> e para cada item iterado ele pega o total de campos e soma em uma variável para utilização em breve.
+                            Depois verificamos se a ação que estamos fazendo é de autorização, se for validamos se o estabelecimento executante foi preenchido, caso não esteja preenchido então ele pega o próximo da lista(Não deu para entender bem este trecho de código).
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">5.1</span> Verifica a disponibilidade de cotas do grupo apac.
+                        <p>
+                            Continuando o código, chega uma parte em que o processo verifica qual o tipo de laudo estamos avaliando para poder pegar a quantidade de cotas autorizadas a fazer.
+                            Para laudos do tipo <code>APAC_RADIOTERAPIA</code> a quantidade é igual a soma do total de campos feita anteriormente. Já para o tipo <code>APAC_TERAPIA_RENAL_SUBSTITUTIVA</code> a quantidade de cotas autorizadas é pega
+                            no próprio procedimento pelo método <code>getNumeroSessoesAutorizadas</code>. E para o resto dos tipos a quantidade autorizada é de apenas 1.
+                            Agora vamos verificar a quantidade de cotas que o grupo apac selecionado pode fazer. Para este processo primeiro criamos uma lista de procedimentos, nela adicionamos
+                            todos os procedimentos que estão com o status de <code>STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO</code> e com o estabelecimento executante preenchido. Depois buscamos um objeto do tipo
+                            <code>FPOCotaGrupoApacVO</code> <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de FPOCotaGrupoApacVO'">(6)</span>
+                            pelo id da unidade executante e pelo id do procedimento.
+                            Agora montamos uma lista de  FPO para cada procedimento, buscamos o mesmo pelo id do procedimento e o id ada unidade executante
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de FPOCotaGrupoApacVO'">(7)</span>.
+                            Depois de trazer todas as fpos validamos se o grupo de apac foi encontrado na consulta a cima,
+                            caso tenha sido encontrado e a variável <code>cotasExcedentesAprovadas</code> seja nula(caso que estamos executanto), então verificamos se o limite físico utilizado de cotas do grupo é maior
+                            ou igual a quantidade de limite físico, caso seja levantamos uma execption do tipo <code>CotaProcedimentoIndisponivelException</code>.
+                            OBS: As fpos buscadas anteriormente são utilizadas apenas para criarmos um objeto do tipo <code>FPOCotaIndisponivel</code> e levantar a exception.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">5.2</span> Faz a reserva de cotas.
+                        <p>
+                            Para a reserva de cotas chamamos o método de reservaCota da classe <code>ControladorCotasBean</code> para cada procedimento. Depois buscamos a fpo
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de FPOCotaGrupoApacVO'">(7)</span>
+                            para este procedimento pelo id do precedimento e da unidade executante,
+                            depois chamamos outro método chamado <code>reservaCota</code> que nos retorna se a cota foi reservada ou não. Neste método verificamos se a fpo passada como parâmetro tem cota. Calculo feito a baixo.
+                            <p>
+                                <code>fpo.getCotaUtilizada() + qtdAprovada <= fpo.getCota()</code>
+                            </p>
+                            Explicando:
+                            Pegamos a quantidade de cotas utilizadas desta fpo e somamos com a quantidade de cotas aprovadas para este procedimento neste processo de avaliação(Calculo feito anteriormente pelo tipo de apac).
+                            Se a quantidade for maior então verificamos se existe cota excedente aprovada(no nosso caso não existe para este processo de avaliação) então retornamos false que significa que não reservamos nenhuma cota, porque esta fpo não tem.
+                            Se a quantidade for menor então buscamos novamente a fpo pelo id da fpo consultada anteriormente. Verificamos o campo de atualização da nova fpo com a da fpo anterior e se os valores forem diferentes então chamamos o mesmo método que estamos(OBS: Método recursivo).
+                            Agora se os valores forem diferentes somamos a quantidade de cota utilizada + a quantidade aprovada e alteramos o valor da propriedade cota utilizada e a propriedade de atualização com a data atual e fazemos update na fpo.
+                            Depois de atualizada a fpo retornamos o valor booleano true para identificar que fizemos a reserva de cotas.
+                            Antes de continuar o processo se a reserva foi feita com sucesso, adicionamos o procedimento em uma lista de procedimentos com cotas.
+                            Caso a reserva não foi feita com sucesso, adicionamos o mesmo em uma lista de procedimentos sem cota.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">6</span> Emissão de números apac.
+                        <p>
+                            Neste processo criamos uma lista com os procedimentos que precisam de numero apac. Fazemos uma iteração na lista de procedimentos e todo o procedimento que tem o status <code>STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO</code>
+                            e tiver a propriedade <code>numeroApac</code> igual a null é adicionado na lista. Depois de montada a lista, chamamos o método <code>alocaItensSerie</code> da classe <code>ControladorNumerosAPACBean</code> passando a quantidade de itens que temos nesta lista e a data atual.
+                            Nele buscamos uma lista de números disponíveis da série apac <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca de Série Apac'">(8)</span>.
+                            OBS: Está query faz lock nesta tabela. Se a query não retornar nada então não acontece nada e o processo continua, caso retorne algo iteramos nos itens desta lista.
+                            Para cada item do tipo <code>ItemSerieVO</code> removemos um item da lista de procedimentos e setamos o numero apac no <code>procedimento(procedimentoLaudo.setNumeroApac(itemSerie.getNumeroAPAC()))</code>.
+                            Antes de setar o numero é chamado um método para calcular o mesmo com uma máscara. Neste calculo adicionamos 7 zeros a esquerda do número, depois retiramos alguns zeros a esquerda até deixar 7 números completos.
+                            EX 0006663. Depois pegamos o código da uf do número <code>apac(Ele pega via System.getProperties)</code> e pega os 2 últimos dígitos do  ano da data passada como parâmetro, <code>concatena o código da uf + string ano + o número 2 + o número apac</code>,
+                            depois gera o dígito e retorna o número cálculado. Depois do número pronto pegamos o <code>ItemSerieVO</code> e mudamos o status para <code>STATUS_ITEM_SERIE_RESERVADO</code> e a data de atualização para a data atual e inserimos um histórico do tipo <code>ItemSerieHistVO</code>
+                            onde a query é executada <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query de histórico ItemSerieHistVO'">(9)</span>.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7</span> Gravando os dados nos procedimentos avaliados.
+                        <p>
+                            Neste processo verificamos os status e para cada um deles tomamos ações diferentes para cada procedimento.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.1</span> <code>STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO</code>
+                        <p>
+                            Se o numero apac estiver preenchido então executamos o processo 7.1.1, se não executamos o processo 7.1.2
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.1.1</span> Verificando se a unidade executante está preenchida.
+                        <p>
+                            Nela verificamos se a unidade executante está preenchida, caso sim setamos o status do procedimento para <code>STATUS_AVALIACAO_PROCEDIMENTO_AUTORIZADO</code> e setamos a propriedade executanteInformadaAutorizacao para true.
+                            Caso não a executante não estiver preenchida então o status do procedimento fica como <code>STATUS_AVALIACAO_PROCEDIMENTO_AGUARDANDO_AGENDAMENTO</code>. Depois fazemos uma outra verificação.
+                            Na verdade fazemos a mesma verificação de unidade executante em cima, mas desta vez se existir a unidade executante então executamos a query
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Busca unidade executante'">(10)</span>.
+                            Caso não tenhamos a unidade então executamos outra query
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 11'">(11)</span>.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.1.2</span> STATUS_AVALIACAO_PROCEDIMENTO_SOLICITADO
+                        <p>
+                            Setamos o status do procedimento para <code>STATUS_AVALIACAO_PROCEDIMENTO_SOLICITADO</code> e o mesmo vai aparecer na tela de avaliação novamente.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.2</span> STATUS_AVALIACAO_PROCEDIMENTO_REJEITADO
+                        <p>
+                            Neste outro processo setamos o status do procedimento para <code>STATUS_AVALIACAO_PROCEDIMENTO_EM_AVALIACAO</code> e fazemos update com a query
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Update procedimento'">(12)</span>.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.3</span> STATUS_AVALIACAO_PROCEDIMENTO_EM_AVALIACAO
+                        <p>
+                            Se o status do procedimento for igual a em avaliação, então setamos o mesmo para <code>STATUS_AVALIACAO_PROCEDIMENTO_SOLICITADO</code> e fazemos update no banco com a query
+                            <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Update procedimento solicitado'">(13)</span>.
+                        </p>
+                    </p>
+                    <p>
+                        <span class="label label-primary ">7.3</span> Final do processo
+                    <p>
+                        No processo 6 de geração dos números, ele retorna uma lista de procedimentos sem apac. Agora verificamos se existe alguém nesta lista, caso exista é levantada uma
+                        exception do tipo <code>NumeroAPACIndisponivelException</code>. Parando todo o processo anterior. (OBS: poderia ser feito antes de fazer toda essa volta).
+                        Se a lista não contiver nenhum valor então alteramos a data de atualização do laudo e fazemos update com a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Update laudo'">(14)</span>.
+                        Caso o laudo tenha alguma observação fazemos um outro update com a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Update observação laudo'">(15)</span>.
+                    </p>
+                    </p>
+                    <h2><span class="label label-primary">Querys</span></h2>
+                    <hr>
+                    <p>
+                        Nesta sessão iremos apresentar todas as querys executadas neste processo. Selecione no combobox a query desejada.
+                    </p>
+                    <p>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                Selecionar Query
+                                <span class="caret" />
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-class="{active: query == 'query101'}"><a href="#apac/avalidacao/query1"><span class="label label-primary glyphicon glyphicon-tag">(1)</span> Busca procedimentos não vigentes</a></li>
+                                <li ng-class="{active: query == 'query102'}"><a href="#apac/avalidacao/query2"><span class="label label-primary glyphicon glyphicon-tag">(2)</span> Busca uma lista de trabalho</a></li>
+                                <li ng-class="{active: query == 'query103'}"><a href="#apac/avalidacao/query3"><span class="label label-primary glyphicon glyphicon-tag">(3)</span> Busca médico autorizador</a></li>
+                                <li ng-class="{active: query == 'query104'}"><a href="#apac/avalidacao/query4"><span class="label label-primary glyphicon glyphicon-tag">(4)</span> Busca de procedimentos</a></li>
+                                <li ng-class="{active: query == 'query105'}"><a href="#apac/avalidacao/query5"><span class="label label-primary glyphicon glyphicon-tag">(5)</span> Busca de laudo pendentes</a></li>
+                                <li ng-class="{active: query == 'query106'}"><a href="#apac/avalidacao/query6"><span class="label label-primary glyphicon glyphicon-tag">(6)</span> Busca de FPO do grupo</a></li>
+                                <li ng-class="{active: query == 'query107'}"><a href="#apac/avalidacao/query7"><span class="label label-primary glyphicon glyphicon-tag">(7)</span> Busca de FPO Vigênte</a></li>
+                                <li ng-class="{active: query == 'query108'}"><a href="#apac/avalidacao/query8"><span class="label label-primary glyphicon glyphicon-tag">(8)</span> Busca de Série Apac</a></li>
+                                <li ng-class="{active: query == 'query109'}"><a href="#apac/avalidacao/query9"><span class="label label-primary glyphicon glyphicon-tag">(9)</span> Insere linha no histórico de Item Série apac</a></li>
+                                <li ng-class="{active: query == 'query110'}"><a href="#apac/avalidacao/query10"><span class="label label-primary glyphicon glyphicon-tag">(10)</span> Update procedimento solicitado como autorizado</a></li>
+                                <li ng-class="{active: query == 'query111'}"><a href="#apac/avalidacao/query11"><span class="label label-primary glyphicon glyphicon-tag">(11)</span> Update procedimento solicitado como aguardando agendamento</a></li>
+                                <li ng-class="{active: query == 'query112'}"><a href="#apac/avalidacao/query12"><span class="label label-primary glyphicon glyphicon-tag">(12)</span> Update procedimento solicitado como rejeitado</a></li>
+                                <li ng-class="{active: query == 'query113'}"><a href="#apac/avalidacao/query13"><span class="label label-primary glyphicon glyphicon-tag">(13)</span> Update procedimento solicitado como solicitado</a></li>
+                                <li ng-class="{active: query == 'query114'}"><a href="#apac/avalidacao/query14"><span class="label label-primary glyphicon glyphicon-tag">(14)</span> Update laudo</a></li>
+                                <li ng-class="{active: query == 'query115'}"><a href="#apac/avalidacao/query15"><span class="label label-primary glyphicon glyphicon-tag">(15)</span> Update observação laudo</a></li>
+                            </ul>
+                        </div>
+                    </p>
+                    <div ng-show="query == 'query1'">
+                        <p>Query que busca os procedimentos fora da vigência.</p>
+                        <div class="jumbotron">
+                            <p>
+                                select proc.id_procedimento_pk, nucleo.ds_procedimento, nucleo.cd_procedimento_sus from
+                                tb_procedimento proc inner join
+                                tb_nucleo_procedimento nucleo on proc.id_procedimento_pk = nucleo.id_procedimento_nucleo_pk
+                                where ? not between proc.dh_inicio_vigencia
+                                and proc.dh_fim_vigencia
+                                and proc.id_procedimento_pk in (?)
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query2'">
+                        <p>Query que busca uma lista de trabalho.</p>
+                        <div class="jumbotron">
+                            <p>
+                                SELECT  /*+ leading(lm ps) index(lm IX_LMED_CD_GRUPO_APAC_FK) index(ps TB_ATEND_PROC_SOLIC_IX01) */
+                                PS.CD_STATUS_FK CD_STATUS_FK,
+                                PS.ID_ATEND_PROC_SOLIC_PK ID_PROCED_LAUDO_MEDICO_PK,
+                                PS.DH_SOLICITACAO DH_SOLICITACAO,
+                                LM.ID_LAUDO_MEDICO_PK ID_LAUDO_MEDICO_PK,
+                                (SELECT ES.NM_FANTS FROM TB_ESTABELECIMENTO_SAUDE ES WHERE LM.ID_ESTAB_SAUDE_SOLIC_FK = ES.ID_ESTABELECIMENTO_SAUDE_PK)  NM_FANTASIA,
+                                (SELECT GA.NM_GRUPO_APAC FROM TB_GRUPO_APAC GA WHERE LM.CD_GRUPO_APAC_FK = GA.CD_GRUPO_APAC_PK)  NM_GRUPO_APAC,
+                                (SELECT NP.DS_PROCEDIMENTO FROM TB_NUCLEO_PROCEDIMENTO NP WHERE NP.ID_PROCEDIMENTO_NUCLEO_PK = PS.ID_PROCEDIMENTO_FK)  DS_PROCED,
+                                (SELECT P.NM_PESSOA FROM TB_PESSOA P WHERE LM.ID_PACIENTE_FK = P.ID_PESSOA_PK)  NM_PACIENTE,
+                                (SELECT P.NM_SOCIAL FROM TB_PESSOA P WHERE LM.ID_PACIENTE_FK = P.ID_PESSOA_PK)  NM_SOCIAL,
+                                (SELECT NP.ID_PROCEDIMENTO_NUCLEO_PK FROM TB_NUCLEO_PROCEDIMENTO NP WHERE NP.ID_PROCEDIMENTO_NUCLEO_PK = PS.ID_PROCEDIMENTO_FK) ID_PROCED_PK,
+                                (SELECT NM_PESSOA FROM TB_PESSOA WHERE ID_PESSOA_PK = LM.ID_USU_ULT_AUTO) NM_USU_ULT_AUTO,
+                                (SELECT SP.NM_STATUS FROM TB_STATUS_PROCEDIMENTO SP WHERE PS.CD_STATUS_FK = SP.CD_STATUS_PK)  NM_STATUS,
+                                PS.NR_LOCK NR_LOCK,
+                                PS.DH_LOCK DH_LOCK,
+                                PS.ID_PRIORIDADE_APAC_FK ID_PRIORIDADE_APAC_FK,
+                                (SELECT P.NM_PRIORIDADE FROM TB_PRIORIDADE_APAC P WHERE P.ID_PRIORIDADE_APAC_PK = PS.ID_PRIORIDADE_APAC_FK)  NM_PRIORIDADE_APAC,
+                                (SELECT ES1.NM_FANTS
+                                FROM TB_ESTABELECIMENTO_SAUDE ES1
+                                WHERE ES1.ID_ESTABELECIMENTO_SAUDE_PK = (SELECT AES.ID_ASCENDENTE_FK
+                                FROM TB_ARVORE_ESTAB_SAUDE AES
+                                WHERE AES.ID_DESCENDENTE_FK = LM.ID_ESTAB_SAUDE_SOLIC_FK
+                                AND AES.ID_ASCENDENTE_FK <> 223
+                                AND AES.ID_ASCENDENTE_FK <> LM.ID_ESTAB_SAUDE_SOLIC_FK
+                                AND 1 = (SELECT COUNT(*)
+                                FROM TB_ARVORE_ESTAB_SAUDE A
+                                WHERE A.ID_DESCENDENTE_FK = AES.ID_ASCENDENTE_FK
+                                AND A.ID_ASCENDENTE_FK <> AES.ID_ASCENDENTE_FK ))) NM_COORDENADORIA
+                                FROM TB_LAUDO_MEDICO LM,
+                                TB_ATEND_PROC_SOLIC PS
+                                WHERE LM.ID_LAUDO_MEDICO_PK = PS.ID_LAUDO_MEDICO_FK
+                                AND PS.ID_LAUDO_MEDICO_FK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query3'">
+                        <p>Consulta feita pelo vidats na tabela <code>VW_MEDICO</code> representada pelo objeto <code>MedicoVO</code>, usando o id.</p>
+                    </div>
+                    <div ng-show="query == 'query4'">
+                        <p>Consulta feita pelo ejb que busca o objeto remote.</p>
+                    </div>
+                    <div ng-show="query == 'query5'">
+                        <p>Query que consulta se algum laudo está pendente.</p>
+                        <div class="jumbotron">
+                            <p>
+                                SELECT
+                                PES.ID_PESSOA_PK idPaciente,
+                                PES.NM_PESSOA nomePaciente,
+                                PES.NM_SOCIAL nomeSocial,
+                                PES.DT_NASCIMENTO dataNascimentoPaciente,
+                                PES.CD_CNS cnsPaciente ,
+                                PES.CD_CPF cpfPaciente,
+                                ESTABSOLIC.NM_FANTS nomeFantasiaEstabelecimento,
+                                NUCLEO.DS_PROCEDIMENTO descricaoProcedimento,
+                                ATENDPROCSOLIC.ID_ATEND_PROC_SOLIC_PK idProcedimentoLaudo,
+                                LAUDO.ID_LAUDO_MEDICO_PK idLaudoMedico ,
+                                STATUS.NM_STATUS nomeStatus,
+                                (SELECT SEXO.DS_SEXO FROM TB_SEXO SEXO WHERE SEXO.ID_SEXO_PK = PES.ID_SEXO_FK) dsSexoPaciente
+                                FROM
+                                TB_PESSOA                PES
+                                INNER JOIN TB_LAUDO_MEDICO  LAUDO         ON ( LAUDO.ID_PACIENTE_FK = PES.ID_PESSOA_PK)
+                                INNER JOIN TB_GRUPO_APAC            GRUPO ON GRUPO.CD_GRUPO_APAC_PK = LAUDO.CD_GRUPO_APAC_FK
+                                INNER JOIN TB_ESTABELECIMENTO_SAUDE ESTABSOLIC ON ESTABSOLIC.ID_ESTABELECIMENTO_SAUDE_PK = LAUDO.ID_ESTAB_SAUDE_SOLIC_FK
+                                INNER JOIN TB_ATEND_PROC_SOLIC      ATENDPROCSOLIC ON ATENDPROCSOLIC.ID_LAUDO_MEDICO_FK = LAUDO.ID_LAUDO_MEDICO_PK
+                                INNER JOIN TB_PROCEDIMENTO          PROC   ON PROC.ID_PROCEDIMENTO_PK  = ATENDPROCSOLIC.ID_PROCEDIMENTO_FK
+                                INNER JOIN TB_NUCLEO_PROCEDIMENTO   NUCLEO ON NUCLEO.ID_PROCEDIMENTO_NUCLEO_PK = PROC.ID_PROCEDIMENTO_NUCLEO_FK
+                                INNER JOIN TB_STATUS_PROCEDIMENTO   STATUS ON STATUS.CD_STATUS_PK = ATENDPROCSOLIC.CD_STATUS_FK
+                                WHERE
+                                (
+                                (
+                                (
+                                (
+                                (
+                                (
+                                ( (PES.ID_PESSOA_PK = #1 ) AND (STATUS.CD_STATUS_PK IN ( #2 ) ) )
+                                AND
+                                (
+                                (ATENDPROCSOLIC.DH_INICIO_VALIDADE <= SYSDATE )
+                                AND (ATENDPROCSOLIC.DT_FIM_VALIDADE >= SYSDATE )
+                                )
+                                )
+                                AND (ATENDPROCSOLIC.ID_PROCEDIMENTO_FK IN ( #3 ) )
+                                )
+                                )
+                                OR
+                                (
+                                (
+                                (
+                                (PES.ID_PESSOA_PK = #4 )
+                                AND (STATUS.CD_STATUS_PK IN ( #5 )  )
+                                )
+                                AND (ATENDPROCSOLIC.ID_PROCEDIMENTO_FK IN ( #6 ) )
+                                )
+                                )
+                                )
+                                )
+                                )
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query6'">
+                        <p>
+                            Query que busca FPO do grupo.
+                            É usado o vidats para busca na tabela <code>VW_FPO_COTA_GRUPO_APAC</code> pelo id do procedimento e pelo id do estabelecimento,
+                            representado pelo objeto <code>FPOCotaGrupoApacVO</code>.
+                        </p>
+                    </div>
+                    <div ng-show="query == 'query7'">
+                        <p>
+                            Query que busca a FPO vigente de cada procedimento pelo id da unidade executante e pelo id do procedimento.
+                            Tabela <code>TB_FPO</code> representada pelo objeto <code>FPOVO</code>
+                        </p>
+                    </div>
+                    <div ng-show="query == 'query8'">
+                        <p>Query que busca números de série apac disponíveis. São passados 7 parâmetros. São eles: </p>
+                        <p>
+                            <code>
+                                dataInicioValidade, dataFimValidade, dataInicioValidade, dataFimValidade = data de hoje <br>
+                                statusItemSerie = D <br>
+                                statusItemSerie = D <br>
+                                numrow = quantidade de numeros a gerar + 1
+                            </code>
+                        </p>
+                        <div class="jumbotron">
+                            <p>
+                                SELECT ID_ITEM_SERIE_PK ID,
+                                ID_SERIE_FK IDSERIE,
+                                NR_APAC NUMEROAPAC,
+                                NR_DIGITO_VERIFICADOR DIGITOVERIFICADOR,
+                                CD_STATUS_FK STATUSITEMSERIE,
+                                NR_TIMESTAMP_ATUALIZACAO TIMESTAMPATUALIZACAO
+                                FROM TB_ITEM_SERIE_APAC
+                                WHERE ID_ITEM_SERIE_PK IN (SELECT ID_ITEM_SERIE_PK
+                                FROM (SELECT ID_ITEM_SERIE_PK
+                                FROM TB_ITEM_SERIE_APAC,
+                                TB_SERIE_APAC
+                                WHERE ID_SERIE_FK = ID_SERIE_PK
+                                AND DT_INICIO_VALIDADE <= ?
+                                AND DT_FIM_VALIDADE >= ?
+                                AND CD_STATUS_FK = ?
+                                AND DH_INCLUSAO IN (SELECT MIN(DH_INCLUSAO)
+                                FROM TB_SERIE_APAC,
+                                TB_ITEM_SERIE_APAC
+                                WHERE ID_SERIE_FK = ID_SERIE_PK
+                                AND DT_INICIO_VALIDADE <= ?
+                                AND DT_FIM_VALIDADE >= ?
+                                AND CD_STATUS_FK = ?)
+                                ORDER BY DT_INICIO_VALIDADE, ID_SERIE_PK, NR_APAC)
+                                WHERE ROWNUM < ?) FOR UPDATE
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query9'">
+                        <p>Query que insere linha no histórico de Item Série apac.</p>
+                        <div class="jumbotron">
+                            <p>
+                                insert into TB_ITEM_SERIE_APAC_HIST (ID_ITEM_SERIE_PK, ID_SERIE_FK, NR_APAC, NR_DIGITO_VERIFICADOR, CD_STATUS_FK, NR_TIMESTAMP_ATUALIZACAO) values (?, ?, ?, ?, ?, ?) <br>
+                            </p>
+                            <p>
+                                <code>
+                                    Parâmetros: <br>
+                                    ID = Pego da tabela de sequências. <br>
+                                    IdSerie = IdSerie do ItemSerieVO. <br>
+                                    numeroAPAC = numero da apac do ItemSerieVO <br>
+                                    digitoVerificador = numero do digito do ItemSerieVO <br>
+                                    statusItemSerie = numero da série do ItemSerieVO <br>
+                                    timestampAtualizacao = long da data de atualização. <br>
+                                </code>
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query10'">
+                        <p>Query que atualiza o procedimento solicitado como autorizado.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_ATEND_PROC_SOLIC PS
+                                SET PS.CD_STATUS_FK = ?,
+                                PS.ID_MEDICO_AUTORIZADOR_FK = ?,
+                                PS.ID_ESTAB_SAUDE_EXECUTANTE_FK = ?,
+                                PS.DH_AVALIACAO = ?,
+                                PS.DT_FIM_VALIDADE = ?,
+                                PS.DT_FIM_VALIDADE_ORIGINAL = ?,
+                                PS.DH_INICIO_VALIDADE = ?,
+                                PS.DH_INICIO_VALIDADE_ORIGINAL = ?,
+                                PS.DH_SOLICITACAO_ORIGINAL = ?,
+                                PS.ID_USUARIO_ULT_ALT = ?,
+                                PS.DH_ULT_ALT = ?,
+                                PS.NR_APAC = ?,
+                                PS.ID_PRIORIDADE_APAC_FK = ?,
+                                PS.IN_EXEC_INFORMADO_AUTORIZACAO = ?,
+                                PS.NR_SESSOES_AUTOR = ?
+                                WHERE PS.ID_ATEND_PROC_SOLIC_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query11'">
+                        <p>Query que atualiza o procedimento solicitado como aguardando agendamento.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_ATEND_PROC_SOLIC PS
+                                SET PS.CD_STATUS_FK = ?,
+                                PS.ID_MEDICO_AUTORIZADOR_FK = ?,
+                                PS.DH_AVALIACAO = ?,
+                                PS.DT_FIM_VALIDADE = ?,
+                                PS.DT_FIM_VALIDADE_ORIGINAL = ?,
+                                PS.DH_INICIO_VALIDADE = ?,
+                                PS.DH_INICIO_VALIDADE_ORIGINAL = ?,
+                                PS.DH_SOLICITACAO_ORIGINAL = ?,
+                                PS.ID_USUARIO_ULT_ALT = ?,
+                                PS.DH_ULT_ALT = ?,
+                                PS.NR_APAC = ?,
+                                PS.ID_PRIORIDADE_APAC_FK = ?,
+                                PS.IN_EXEC_INFORMADO_AUTORIZACAO = ?,
+                                PS.NR_SESSOES_AUTOR = ?
+                                WHERE PS.ID_ATEND_PROC_SOLIC_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query12'">
+                        <p>Query que atualiza o procedimento solicitado como rejeitado.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_ATEND_PROC_SOLIC PS
+                                SET PS.CD_STATUS_FK = ?,
+                                PS.DH_AVALIACAO = ?,
+                                PS.DS_JUSTIFICATIVA = ?,
+                                PS.ID_MOTIVO_REJEICAO_FK = ?,
+                                PS.ID_USUARIO_ULT_ALT = ?,
+                                PS.DH_ULT_ALT = ?,
+                                PS.ID_PRIORIDADE_APAC_FK = ?,
+                                PS.IN_EXEC_INFORMADO_AUTORIZACAO = ?
+                                WHERE PS.ID_ATEND_PROC_SOLIC_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query13'">
+                        <p>Query que atualiza o procedimento solicitado como solicitado.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_ATEND_PROC_SOLIC PS
+                                SET PS.CD_STATUS_FK = ?,
+                                PS.ID_MEDICO_AUTORIZADOR_FK = ?,
+                                PS.ID_USUARIO_ULT_ALT = ?,
+                                PS.DH_ULT_ALT = ?,
+                                PS.ID_PRIORIDADE_APAC_FK = ?,
+                                PS.IN_EXEC_INFORMADO_AUTORIZACAO = ?
+                                WHERE PS.ID_ATEND_PROC_SOLIC_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query14'">
+                        <p>Query que atualiza o laudo médico.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_LAUDO_MEDICO LM
+                                SET LM.CD_USU_ALT = ?, LM.DH_ALT = ?
+                                WHERE LM.ID_LAUDO_MEDICO_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                    <div ng-show="query == 'query15'">
+                        <p>Query que atualiza a observação do laudo médico.</p>
+                        <div class="jumbotron">
+                            <p>
+                                UPDATE TB_LAUDO_MEDICO LM
+                                SET LM.OBSERVACAO = ?
+                                WHERE LM.ID_LAUDO_MEDICO_PK = ?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

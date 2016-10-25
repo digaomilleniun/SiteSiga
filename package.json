@@ -1,0 +1,16 @@
+{
+  "name": "SiteSiga",
+  "version": "1.0.0",
+  "description": "Documentação do projeto Siga Saúde.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rodrigo Pires",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.5.8",
+    "angular-route": "^1.5.8",
+    "bootstrap": "^3.3.7"
+  }
+}
