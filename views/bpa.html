@@ -2,11 +2,348 @@
     <div class="row">
         <div class="jumbotron text-center">
             <h1>BPA</h1>
-            <p></p>
+            <p>Boletim de Produção Ambulatorial</p>
         </div>
         <div id="section1" class="col-sm-9">
             <h2><span class="label label-primary">Entendendo</span></h2>
-            <hr>
+            <hr/>
+            <p>
+                Sistema descentralizado utilizado mensalmente pelas Unidades Prestadoras de Serviço para transcrição dos quantitativos dos atendimentos prestados nos ambulatórios (Boletim de Produção Ambulatorial - BPA), criticando-os conforme regras estabelecidas em portarias.
+
+                Os dados transcritos no sistema BPA MAGNÈTICO são importados para o sistema SIASUS, onde são processados e validados. Sua atualização de versão eventual, normalmente é relacionada a alterações nas tabelas do sistema, como publicação de regras em portarias ou ofícios da Secretaria Nacional de Atenção à Saúde.
+            </p>
+            <div class="alert alert-danger" role="alert">
+                Referência retirada no site do
+                <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
+                <a target="_blank" href="http://datasus.saude.gov.br/sistemas-e-aplicativos/ambulatoriais/bpa-magnetico">datasus</a>
+            </div>
+            <p>
+                Nesta documentação iremos explicar como funciona o BPA dentro do sistema SIGA-SAÚDE. Selecione o menu abaixo para cada tipo.
+            </p>
+            <ul class="nav nav-tabs" role="tablist" >
+                <li role="presentation" ng-class="{active: funcionalidade == 'simulacao'}"><a href="#bpa/simulacao/query" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> Simulação</a></li>
+                <li role="presentation" ng-class="{active: funcionalidade == 'servico'}"><a href="#bpa/servico/query" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> Serviço e Classificação</a></li>
+                <li role="presentation" ng-class="{active: funcionalidade == 'layout'}"><a href="#bpa/layout/query" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> Layout Individualizado</a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="" id="simulacao" ng-show="funcionalidade == 'simulacao'">
+                    <br/>
+                    <p>
+                        Para simular o rel de bpa individualizado primeiro precisamos inserir um paciente no registro reduzido, pode ser qualquer paciente,
+                        já para o procedimento o mesmo deve ser individualizado
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 1'">(1)</span>
+                        e a especialidade pode ser qualquer uma.
+                        O profissional deve ter um vinculo vigente que bata com a especialidade.
+                    </p>
+                    <p>
+                        Uma outra configuração que deve ser feita á a configuração da competência do bpa. Vá até o menu configurações > BPA - Competência.
+                        La você deve configurar a competência. No meu caso coloquei a configuração usando todas as datas com início em 01/06/2014 e
+                        fim 30/06/2014. O data do registro reduzido deve ser no mês 6 para está configuração. (Na configuração da competência deve se atentar para
+                        a data de digitação, pois se na configuração estiver no mês 6 e o registro reduzido for inserido no mês anterior ou posterior, o mesmo
+                        não ira sair no relatório.
+                    </p>
+                    <p>
+                        Isso acontece porque a data de inclusão do registro é equivalente a data de digitação da competência do bpa.
+                        Exemplo: Se estou registrando um registro no mês 6 e a data de digitação da competência não esta no mês 6, estas informações não
+                        iram sair no relatório do mês 6).
+                        Pronto o relatório já pode ser feito. Para cada registro reduzido inserido na data do mês 6 com qualquer procedimento individualizado,
+                        o mesmo deve aparecer no relatório. Caso apareça menos linhas que o esperado, verifique a coluna
+                        <code>NR_QTD_MAX_BPA</code> da tabela de
+                        procedimento, ela é responsável pela quantidade de visualizações permitidas no relatório de cada procedimento.
+                    </p>
+                    <p>
+                        <h4><span class="label label-danger">Exemplo:</span></h4>
+                    </p>
+                    <p>
+                        Fiz um registro reduzido com a quantidade 20 e fiz um com a quantidade 1. Na tabela <code>TB_PROCEDIMENTO</code> na coluna <code>NR_QTD_MAX_BPA</code> está com o valor de 20.
+                        Quando eu tirar um relatório de bpa, no arquivo vira somente o registro com a quantidade 20. Isso acontece porque só posso cobrar
+                        os procedimentos feitos por paciente no mesmo dia para o mesmo procedimento na quantidade configurada na tabela descrita. Então se configurei 20
+                        e solicitei 21 então somente posso cobrar 20.
+                    </p>
+                    <div>
+                        <h2><span class="label label-primary">Querys</span></h2>
+                        <hr/>
+                        <p>
+                            Nesta sessão iremos apresentar todas as querys executadas neste processo. Selecione no combobox a query desejada.
+                        </p>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                Selecionar Query
+                                <span class="caret" />
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-class="{active: query == 'query1'}"><a href="#bpa/simulacao/query1"><span class="label label-primary glyphicon glyphicon-tag">(1)</span>Query 1</a></li>
+                            </ul>
+                        </div>
+                        <div ng-show="query == 'query1'">
+                            <div class="jumbotron">
+                                <p>
+                                    SELECT
+                                    NP.IN_SITUACAO_REGISTRO, R.ID_REGISTRO_PK, R.DS_REGISTRO, NP.CD_PROCEDIMENTO_SUS, NP.DS_PROCEDIMENTO,
+                                    PR.DH_INICIO_VIGENCIA, PR.DH_FIM_VIGENCIA
+                                    FROM
+                                    TB_PROCEDIMENTO_REGISTRO PR
+                                    JOIN TB_REGISTRO R ON R.ID_REGISTRO_PK = PR.ID_REGISTRO_FK
+                                    JOIN TB_NUCLEO_PROCEDIMENTO NP ON NP.ID_PROCEDIMENTO_NUCLEO_PK = PR.ID_PROCEDIMENTO_FK
+                                    WHERE
+                                    R.ID_REGISTRO_PK IN (1,2)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="" id="servico" ng-show="funcionalidade == 'servico'">
+                    <br/>
+                    <p>
+                        A configuração de serviço e classificação se da em torno de 3 tabelas.
+                    </p>
+                    <code>
+                        <ul class="list-group">
+                            <li class="list-group-item">TB_PROCED_SERVICO_CLASSIF</li>
+                            <li class="list-group-item">TB_BPA_CONF_PROC_REGISTRO</li>
+                            <li class="list-group-item">TB_SERV_CLASSIFIC_ESTBL</li>
+                        </ul>
+                    </code>
+                    <p>
+                        <span class="label label-danger glyphicon glyphicon glyphicon-ok"> TB_PROCED_SERVICO_CLASSIF</span>
+                    </p>
+                    <p>
+                        É a tabela de associação do procedimento(TB_PROCEDIMENTO) com a de serviço e classificação(TB_SERVICO_CLASSIFICACAO).
+                        Nesta tabela se verifica se o procedimento precisa de validação. Caso exista um registro nesta tabela o mesmo precisa ser validado.
+                        Para inserir informações nesta tabela executa a query <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 1'">(Query-1)</span>
+                        para encontrar o procedimento, depois execute a query <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 2'">(Query-2)</span>
+                        para encontrar o serviço/classificação desejado. Pegue o id das duas tabelas e execute a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 3'">(Query-3)</span>
+                        para inserção da mesma.
+                        Depois de feitos os 3 passos a cima você acabou de informar que é necessárioa a validação para um determinado procedimento com um serviço/classificação.
+                        Caso não seja necessário a validação deve ser executado a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 4'">(Query-4)</span>.
+                    </p>
+                    <p>
+                        <span class="label label-danger glyphicon glyphicon glyphicon-ok"> TB_BPA_CONF_PROC_REGISTRO</span>
+                    </p>
+                    <p>
+                        É a tabela que informa se o bpa tem uma determinada configuração. Na tabela de procedimento nós importamos algumas informações do SIGTAP
+                        onde informamos se o procedimento é INDIVIDUALIZADO ou CONSOLIDADO. Quando existir um registro nesta tabela estamos informando que vamos
+                        substituir a regra da tabela de procedimento por está. Ou seja vamos dizer que um procedimento consolidado agora é individualizado
+                        para um determinado procedimento em um determinado estabelecimento e para um determinado cbo com uma vigência.
+
+                        Então está configuração sobrescreve a regra na geração do relatório do bpa.
+
+                        Para inserção de valores executar a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 5'">(Query-5)</span>
+                        Para a exclusão executar a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 6'">(Query-6)</span>.
+
+                        Para não ter nenhum serviço/classificação específico na configuração executar a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 12'">(Query-12)</span>.
+                    </p>
+                    <p>
+                        <span class="label label-danger glyphicon glyphicon glyphicon-ok"> TB_SERV_CLASSIFIC_ESTBL</span>
+                    </p>
+                    <p>
+                        Está tabela guarda a informção de qual estabelecimento pode executar um determinado serviço/classificação.
+
+                        Para inserção de valores executar a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 9'">(Query-9)</span>.
+                        Para a exclusão executar a query
+                        <span class="label label-primary glyphicon glyphicon-tag" data-toggle="tooltip" title="Ir para sessão querys e selcionar 'Query 10'">(Query-10)</span>.
+
+
+                        Após fazer todos os passos acima, precisamos fazer um atendimento reduzido. Nele informamos um profissinal com o cbo utilizado nas configurações e
+                        informamos o procedimento utilizado nas configurações.
+
+                        Depois é só gerar um relatório de bpa.
+
+                        Para a geração do relatório podemos gerar com crítica ou sem crítica.
+
+                        Caso gere o arquivo com crítica, se faltar alguma informação na configuração acima o registro não vai aparecer no relatório.
+                        Então você consegue garantir que o mesmo está faltando inforamção consultando a tela de inconsistências do bpa. Após consultar o mesmo
+                        o registro aparece neste relatório.
+
+                        Se gerarmos o arquivo sem crítica e faltou alguma configuração, o registro do atendimento deve vir no relatório.
+                    </p>
+                    <div>
+                        <h2><span class="label label-primary">Querys</span></h2>
+                        <hr/>
+                        <p>
+                            Nesta sessão iremos apresentar todas as querys executadas neste processo. Selecione no combobox a query desejada.
+                        </p>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                Selecionar Query
+                                <span class="caret" />
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li ng-class="{active: query == 'query1'}"><a href="#bpa/servico/query1"><span class="label label-primary glyphicon glyphicon-tag">(1)</span>Query 1</a></li>
+                                <li ng-class="{active: query == 'query2'}"><a href="#bpa/servico/query2"><span class="label label-primary glyphicon glyphicon-tag">(2)</span>Query 2</a></li>
+                                <li ng-class="{active: query == 'query3'}"><a href="#bpa/servico/query3"><span class="label label-primary glyphicon glyphicon-tag">(3)</span>Query 3</a></li>
+                                <li ng-class="{active: query == 'query4'}"><a href="#bpa/servico/query4"><span class="label label-primary glyphicon glyphicon-tag">(4)</span>Query 4</a></li>
+                                <li ng-class="{active: query == 'query5'}"><a href="#bpa/servico/query5"><span class="label label-primary glyphicon glyphicon-tag">(5)</span>Query 5</a></li>
+                                <li ng-class="{active: query == 'query6'}"><a href="#bpa/servico/query6"><span class="label label-primary glyphicon glyphicon-tag">(6)</span>Query 6</a></li>
+
+                                <li ng-class="{active: query == 'query7'}"><a href="#bpa/servico/query7"><span class="label label-primary glyphicon glyphicon-tag">(7)</span>Query 7</a></li>
+                                <li ng-class="{active: query == 'query8'}"><a href="#bpa/servico/query8"><span class="label label-primary glyphicon glyphicon-tag">(8)</span>Query 8</a></li>
+                                <li ng-class="{active: query == 'query9'}"><a href="#bpa/servico/query9"><span class="label label-primary glyphicon glyphicon-tag">(9)</span>Query 9</a></li>
+                                <li ng-class="{active: query == 'query10'}"><a href="#bpa/servico/query10"><span class="label label-primary glyphicon glyphicon-tag">(10)</span>Query 10</a></li>
+                                <li ng-class="{active: query == 'query11'}"><a href="#bpa/servico/query11"><span class="label label-primary glyphicon glyphicon-tag">(11)</span>Query 11</a></li>
+                                <li ng-class="{active: query == 'query12'}"><a href="#bpa/servico/query12"><span class="label label-primary glyphicon glyphicon-tag">(12)</span>Query 12</a></li>
+                            </ul>
+                        </div>
+                        <br/>
+                        <div ng-show="query == 'query1'">
+                            Query-1 TB_PROCEDIMENTO
+                            <div class="jumbotron">
+                                <p>
+                                    select * from tb_nucleo_procedimento where DS_PROCEDIMENTO like('%COLOQUE_NOME_PROCEDIMENTO%');
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query2'">
+                            Query-2 TB_SERVICO_CLASSIFICACAO
+                            <div class="jumbotron">
+                                <p>
+                                    select * from tb_servico_classificacao where DS_CLASSIFICACAO like('%COLOQUE_NOME_SERVICO%');
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query3'">
+                            Query-3 TB_PROCED_SERVICO_CLASSIF
+                            <div class="jumbotron">
+                                <p>
+                                    insert into tb_proced_servico_classif
+                                    values(sq_proced_servico_classif.nextval,300661,300679,'A',
+                                    13691658,sysdate,13691658,
+                                    sysdate,sysdate -100, sysdate+1000);
+                                </p>
+                            </div>
+                            <div class="alert alert-danger" role="alert">
+                                O segundo e o terceiro parâmetro são os mais importates.
+                                <ul class="list-group">
+                                    <li class="list-group-item">1 Parâmetro: Id do procedimento</li>
+                                    <li class="list-group-item">3 Parâmetro: Id do serviço/classificação</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query4'">
+                            Query-4 Delete de validação para um procedimento com serviço/classificação.
+                            <div class="jumbotron">
+                                <p>
+                                    delete tb_proced_servico_classif
+                                    where id_procedimento_fk = ?
+                                    and id_serv_classific_fk = ?;
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query5'">
+                            Query-5 Adição da configuração de procedimento do bpa.
+                            <div class="jumbotron">
+                                <p>
+                                    insert into tb_bpa_conf_proc_registro values (SQ_BPA_CONF_PROC_REGISTRO.nextval,1148, 300661,6310, 2, sysdate, sysdate+30, 300090, 300679);
+                                </p>
+                            </div>
+                            <div class="alert alert-danger" role="alert">
+                                <ul class="list-group">
+                                    <li class="list-group-item">1 Parâmetro: Id do estabeledimento</li>
+                                    <li class="list-group-item">2 Parâmetro: Id do procedimento (QUERY-1)</li>
+                                    <li class="list-group-item">3 Parâmetro: Id do CBO (QUERY-7)</li>
+                                    <li class="list-group-item">Parâmetro: Id do registro(TB_REGISTRO) 1 para consolidado e 2 para individualizado</li>
+                                    <li class="list-group-item">Penúltimo parâmetro: Id do Serviço especializado. (QUERY-8)</li>
+                                    <li class="list-group-item">Último parâmetro: Id do serviço classificação. (QUERY-2)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query6'">
+                            Query-6 Delete da configuração de procedimento do bpa.
+                            <div class="jumbotron">
+                                <p>
+                                    delete from tb_bpa_conf_proc_registro where id_procedimento_fk = ADICIONAR AQUI O ID DO PROCEDIMENTO;
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query7'">
+                            Query-7 Consulta de CBO.
+                            <div class="jumbotron">
+                                <p>
+                                    select * from tb_cbo where ds_cbo like('%NOME_CBO%');
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query8'">
+                            Query-8 Consulta de serviço especializado
+                            <div class="jumbotron">
+                                <p>
+                                    select * from TB_SERV_ESPEC where ds_serv_espec like('%NOME%');
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query9'">
+                            Query-9 insere serviços/classificação para um estabelecimento.
+                            <div class="jumbotron">
+                                <p>
+                                    insert into TB_SERV_CLASSIFIC_ESTBL
+                                    values((select max(ID_SERV_CLASSIFIC_ESTBL_PK) +1 from TB_SERV_CLASSIFIC_ESTBL),
+                                    1148,300090,300679,null,null,null,sysdate,13691658,sysdate);
+                                </p>
+                            </div>
+                            <div class="alert alert-danger" role="alert">
+                                <ul class="list-group">
+                                    <li class="list-group-item">2 Parâmetro: Id do estabeledimento</li>
+                                    <li class="list-group-item">3 Parâmetro: Id do serviço especializado (QUERY-8)</li>
+                                    <li class="list-group-item">4 Parâmetro: Id do serviço/classificação (QUERY-2)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query10'">
+                            Query-10 Remove um serviços/classificação para um estabelecimento.
+                            <div class="jumbotron">
+                                <p>
+                                    delete from TB_SERV_CLASSIFIC_ESTBL
+                                    where id_estabelecimento_saude_fk = 1148
+                                    and ID_SERV_ESPEC_FK = 300090
+                                    and ID_CLASSIFIC_FK = 300679;
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query11'">
+                            Query-11 Consulta quais os serviços/classificação que um estabelecimento pode executar.
+                            <div class="jumbotron">
+                                <p>
+                                    select * from TB_SERV_CLASSIFIC_ESTBL where id_estabelecimento_saude_fk = 1148;
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-show="query == 'query12'">
+                            Query-12 deixa a configuração sem nenhum servico/classificação
+                            <div class="jumbotron">
+                                <p>
+                                    update tb_bpa_conf_proc_registro
+                                    set ID_SERV_ESPEC_FK = null,
+                                    ID_SERV_CLASSIFIC_FK = null
+                                    where id_bpa_conf_proc_registro_pk = ?;
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="" id="layout" ng-show="funcionalidade == 'layout'">
+                    <br>
+                    <p>
+                    Nesta sessão encontramos os layouts dos arquivos do BPA.
+                    </p>
+                    <div class="tab-content">
+                        <ul class="nav nav-tabs" role="tablist" >
+                            <li role="presentation" ng-class="{active: funcionalidade == 'layoutIndividualizado'}"><a href="#bpa/layout/query/layoutIndividualizado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Individualizado</a></li>
+                            <li role="presentation" ng-class="{active: funcionalidade == 'layoutConsolidado'}"><a href="#bpa/layout/query/layoutConsolidado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Consolidado</a></li>
+                        </ul>
+                        <div role="tabpanel" class="" id="layoutIndividualizado" ng-show="funcionalidade == 'layoutIndividualizado'">
+                        </div>
+                        <div role="tabpanel" class="" id="layoutConsolidado" ng-show="funcionalidade == 'layoutConsolidado'">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

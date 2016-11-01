@@ -51,6 +51,11 @@
                 controller     : 'BPAFuncionalidadeCtrl',
             })
 
+            .when('/bpa/:funcionalidade/:query/:layout', {
+                templateUrl : 'views/bpa.html',
+                controller     : 'BPAFuncionalidadeCtrl',
+            })
+
 
             // caso não seja nenhum desses, redirecione para a rota '/'
             .otherwise ({ redirectTo: '/PaginaNaoEncontrada' });
@@ -86,6 +91,12 @@
     app.controller('BPAFuncionalidadeCtrl', function ($scope, $location, $routeParams) {
         $scope.funcionalidade = $routeParams.funcionalidade;
         $scope.query = $routeParams.query;
+    });
+
+    app.controller('BPAFuncionalidadeLayoutCtrl', function ($scope, $location, $routeParams) {
+        $scope.funcionalidade = $routeParams.funcionalidade;
+        $scope.query = $routeParams.query;
+        $scope.layout = $routeParams.layout;
     });
 
 

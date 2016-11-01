@@ -109,14 +109,18 @@
                 deve ter um job com a classe <span class="label label-warning"> cesar.datasussisreg.service.filaespera.AutomacaoFilaEsperaJob </span>. Neste job devemos ter uma tag chamada <span class="label label-warning">'<'job-data-map'\>'</span>, nela deve estar configurado o nome do grupo a ser executado conforme exemplo abaixo:
             </p>
             <p>
-                <div class="jumbotron ">
-                    <'job-data-map><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'entry><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'key>NODE<'/KEY><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'value>SERVIDOR_1<'/value><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'/entry><br>
-                    <'/job-data-map>
-                </div>
+                <figure class="highlight">
+                        <pre>
+                            <code class="language-html" data-lang="html">
+                                <span class="nt">&lt;job-data-map</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;entry</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;key</span><span class="nt">&gt;</span>NODE<span class="nt">&lt;/key</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;value</span><span class="nt">&gt;</span>SERVIDOR_1<span class="nt">&lt;/value</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;/entry</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;/job-data-map</span><span class="nt">&gt;</span>
+                            </code>
+                        </pre>
+                </figure>
             </p>
             <p>
                 Notem que existe uma chave e um valor nesta configuração. Na chave sempre devemos passar <span class="label label-warning">NODE</span>, porque a aplicação espera receber um parâmetro com esta chave, já o nome do servidor é configurado na tabela <span class="label label-warning">TB_FE_GRUPO_CONF_AGD_AUTO</span>,
@@ -124,30 +128,36 @@
                 Vejamos um exemplo do job completo abaixo.
             </p>
             <p>
-                <div class="jumbotron ">
-                    <'job><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'job-detail><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'name>AutomacaoFilaEsperaJob<'/name><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'group>AutomacaoFilaEsperaJob<'/group><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-class>cesar.datasussisreg.service.filaespera.AutomacaoFilaEsperaJob<'/job-class><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-data-map><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'entry><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'key>NODE<'/key><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'value>SERVIDOR_1<'/value><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/entry><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/job-data-map><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'/job-detail><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'trigger><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'cron><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'name>AutomacaoFilaEsperaJob<'/name><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'group>AutomacaoFilaEsperaJob<'/group><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-name>AutomacaoFilaEsperaJob<'/job-name><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'job-group>AutomacaoFilaEsperaJob<'/job-group><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'cron-expression>0 0/2 * * * ? *<'/cron-expression><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<'/cron><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<'/trigger><br>
-                    <'/job><br>
-                </div>
+                <figure class="highlight">
+                    <pre>
+                        <code class="language-html" data-lang="html">
+                            <span class="nt">&lt;job</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;job-detail</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;name</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/name</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;group</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/group</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;job-class</span><span class="nt">&gt;
+                                        </span>cesar.datasussisreg.service.filaespera.AutomacaoFilaEsperaJob
+                                    <span class="nt">&lt;/job-class</span><span class="nt">&gt;
+                                    <span class="nt">&lt;job-data-map</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;entry</span><span class="nt">&gt;</span>
+                                            <span class="nt">&lt;key</span><span class="nt">&gt;</span>NODE<span class="nt">&lt;/key</span><span class="nt">&gt;</span>
+                                            <span class="nt">&lt;value</span><span class="nt">&gt;</span>SERVIDOR_1<span class="nt">&lt;/value</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;/entry</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;/job-data-map</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;/job-detail</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;trigger</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;cron</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;name</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/name</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;group</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/group</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;job-name</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/job-name</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;job-group</span><span class="nt">&gt;</span>AutomacaoFilaEsperaJob<span class="nt">&lt;/job-group</span><span class="nt">&gt;</span>
+                                        <span class="nt">&lt;cron-expression</span><span class="nt">&gt;</span>0 0/2 * * * ? *<span class="nt">&lt;/cron-expression</span><span class="nt">&gt;</span>
+                                    <span class="nt">&lt;/cron</span><span class="nt">&gt;</span>
+                                <span class="nt">&lt;/trigger</span><span class="nt">&gt;</span>
+                            <span class="nt">&lt;/job</span><span class="nt">&gt;</span>
+                        </code>
+                    </pre>
+                </figure>
             </p>
             <p>
                 Feita ou verificada toda essa configuração, é necessário reiniciar o servidor de aplicação para que o job comece a ser executado.
