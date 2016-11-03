@@ -1,0 +1,54 @@
+<div class="container">
+    <div class="row">
+        <div class="jumbotron text-center">
+            <h1>CMC</h1>
+            <p>Boletim de Produção Ambulatorial</p>
+        </div>
+        <div id="section1" class="col-sm-9">
+            <h2><span class="label label-primary">Entendendo</span></h2>
+            <hr/>
+            <p>
+                Nesta documentação iremos explicar como criar uma APPI e uma FPO para o funcionamento da tela de agendamento de vagas reguladas.
+            </p>
+            <ul class="nav nav-tabs" role="tablist" >
+                <li role="presentation" ng-class="{active: funcionalidade == 'appi'}"><a href="#cmc/appi" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> APPI</a></li>
+                <li role="presentation" ng-class="{active: funcionalidade == 'fpo'}"><a href="#cmc/fpo" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" /> FPO</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div role="tabpanel" class="" id="appi" ng-show="funcionalidade == 'appi'">
+                    <br/>
+                    <p>
+                        <h4><span class="label label-danger">Passos para criar uma APPI:</span></h4>
+                    </p>
+                    <p>
+                        Para criar uma APPI vá em <code>Configuração > Configuração da CMC > Configurar Limites Físicos/Financeiro</code>.
+
+                        Lá selecione a última competência existente e coloque no campo competência inicial a próxima competência. Exemplo:
+
+                        No combo de PPI's já existentes você vai selecionar a ultimá competência, no nosso caso é 09/2013 até 08/2014 e no campo de competência inicial
+                        logo a baixo você vai colocar 09/2014, depois é só next, next e finish. Após estes passos já deve aparecer a nova PPI.
+
+                        <div class="alert alert-danger" role="alert">
+                            OBS: Para criar um APPI do mês 09 devemos estar no mês 08 ou antes, caso já tenha passado este mês,
+                            é preciso trocar a data da máquina para o mês anterior ao que você vai criar.
+                        </div>
+
+
+                        Agora é preciso definir capacidade programada. Vá até <code>Configuração > Configuração da CMC > Definir Capacidade Programada</code>.
+
+                        La selecione todas as unidades e continuar, depois selecione a unidade a ser configurada e adicione procedimentos para a mesma com um lime
+                        para execução, salve. Após vá até <code>Configuração > Configuração de solicitação – Concluir</code> e depois em  <code>Configuração de solicitação – Ativar</code>.
+                        Após estes passos é só criar as vagas para o profissional.
+                    </p>
+                </div>
+                <div role="tabpanel" class="" id="fpo" ng-show="funcionalidade == 'fpo'">
+                    <br/>
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

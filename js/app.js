@@ -51,11 +51,15 @@
                 controller     : 'BPAFuncionalidadeCtrl',
             })
 
-            .when('/bpa/:funcionalidade/:query/:layout', {
-                templateUrl : 'views/bpa.html',
-                controller     : 'BPAFuncionalidadeCtrl',
+            .when('/cmc', {
+                templateUrl : 'views/cmc.html',
+                controller     : 'CMCFuncionalidadeCtrl',
             })
 
+            .when('/cmc/:funcionalidade', {
+                templateUrl : 'views/cmc.html',
+                controller     : 'CMCFuncionalidadeCtrl',
+            })
 
             // caso não seja nenhum desses, redirecione para a rota '/'
             .otherwise ({ redirectTo: '/PaginaNaoEncontrada' });
@@ -89,14 +93,13 @@
     });
 
     app.controller('BPAFuncionalidadeCtrl', function ($scope, $location, $routeParams) {
+        $scope.activetab = $location.path();
         $scope.funcionalidade = $routeParams.funcionalidade;
         $scope.query = $routeParams.query;
     });
 
-    app.controller('BPAFuncionalidadeLayoutCtrl', function ($scope, $location, $routeParams) {
+    app.controller('CMCFuncionalidadeCtrl', function ($scope, $routeParams) {
         $scope.funcionalidade = $routeParams.funcionalidade;
-        $scope.query = $routeParams.query;
-        $scope.layout = $routeParams.layout;
     });
 
 

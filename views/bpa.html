@@ -330,16 +330,62 @@
                 <div role="tabpanel" class="" id="layout" ng-show="funcionalidade == 'layout'">
                     <br>
                     <p>
-                    Nesta sessão encontramos os layouts dos arquivos do BPA.
+                        Nesta sessão encontramos os layouts dos arquivos do BPA.
                     </p>
-                    <div class="tab-content">
+                    <!--<div class="tab-content">
                         <ul class="nav nav-tabs" role="tablist" >
-                            <li role="presentation" ng-class="{active: funcionalidade == 'layoutIndividualizado'}"><a href="#bpa/layout/query/layoutIndividualizado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Individualizado</a></li>
-                            <li role="presentation" ng-class="{active: funcionalidade == 'layoutConsolidado'}"><a href="#bpa/layout/query/layoutConsolidado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Consolidado</a></li>
+                            <li role="presentation" ng-class="{active: layout == 'layoutIndividualizado'}"><a href="#bpa/layout/layoutIndividualizado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Individualizado</a></li>
+                            <li role="presentation" ng-class="{active: layout == 'layoutConsolidado'}"><a href="#bpa/layout/layoutConsolidado" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-resize-full" aria-hidden="true" />Consolidado</a></li>
                         </ul>
-                        <div role="tabpanel" class="" id="layoutIndividualizado" ng-show="funcionalidade == 'layoutIndividualizado'">
+                        <div role="tabpanel" class="" id="layoutIndividualizado" ng-show="layout == 'layoutIndividualizado'">
+                            Indiv
                         </div>
-                        <div role="tabpanel" class="" id="layoutConsolidado" ng-show="funcionalidade == 'layoutConsolidado'">
+                        <div role="tabpanel" class="" id="layoutConsolidado" ng-show="layout == 'layoutConsolidado'">
+                            Conso
+                        </div>
+                    </div>-->
+                    <h4><span class="label label-danger">Layout BPA Individualizado:</span></h4>
+                    <div class="panel panel-primary">
+                        <div class="panel-body">
+                            <p><span class="nt">03 = string fixa com 2 posições</span></p>
+                            <p><span class="nt">2751925 = cnes com 7 posições (Pode aumentar depende do valor do banco)</span></p>
+                            <p><span class="nt">03 = string fixa com 2 posições</span></p>
+                            <p><span class="nt">2751925 = cnes com 7 posições (Pode aumentar depende do valor do banco)</span></p>
+                            <p><span class="nt">201407 = competencia com 6 posições</span></p>
+                            <p><span class="nt">898001428879880 = cns profissional com 15 posições</span></p>
+                            <p><span class="nt">225125 = cbo com 6 posições (Pode aumentar depende do valor do banco)</span></p>
+                            <p><span class="nt">20140707 = data de atendimento com 8 posições</span></p>
+                            <p><span class="nt">001 = numero de folhas com 3 posições</span></p>
+                            <p><span class="nt">01 = numero de linhas com 2 posições</span></p>
+                            <p><span class="nt">040101001 = codigo do procedimento com 9 posições (Pode aumentar depende do valor do banco)</span></p>
+                            <p><span class="nt">5 = nao sei</span></p>
+                            <p><span class="nt">898001428879880 = cns do paciente com 15 posições</span></p>
+                            <p><span class="nt">M = sexo com 1 posição</span></p>
+                            <p><span class="nt">355030 = codigo ibga com 6 posições</span></p>
+                            <p><span class="nt">{4 posições} = cid, caso nao venha, colocar 4 espacos em branco</span></p>
+                            <p><span class="nt">034 = idade com 3 posições</span></p>
+                            <p><span class="nt">000010 = quantidade com 6 posições</span></p>
+                            <p><span class="nt">01 = fixo com 2 posições</span></p>
+                            <p><span class="nt">{13 posições em branco} = 13 posicoes em branco</span></p>
+                            <p><span class="nt">BPA = fixo com 3 posições</span></p>
+                            <p><span class="nt">JOAO PAULO DE SOUZA SOBREIRA  = nome com 30 posicoes</span></p>
+                            <p><span class="nt">19800615 = data de nascimento ou 8 poscioes em branco</span></p>
+                            <p><span class="nt">01 = raca com 2 posições</span></p>
+                            <p><span class="nt">{4 posições em branco} = etnia ou 4 posicoes em branco</span></p>
+                            <p><span class="nt">010 = codigo nacionalidade com 3 posicoes se for branco colocar 010</span></p>
+                            <p><span class="nt">{3 posições} = codigo servico 3 posicoes</span></p>
+                            <p><span class="nt">{3 posições} = codigo classificacao 3 posicoes</span></p>
+                            <p><span class="nt">{8 posições} = codigo equipe 8 posicoes</span></p>
+                            <p><span class="nt">{4 posições} = codigo area equipe 4 posicoes</span></p>
+                            <p><span class="nt">{14 posições} = cnpj empresa 14 posicoes</span></p>
+                            <p><span class="nt">03814000 = cep paciente 8 posicoes</span></p>
+                            <p><span class="nt">081 = codigo logradouro paciente 3 posicoes</span></p>
+                            <p><span class="nt">SAMPEI SATO {30 posições no total} = end paciente 30 posicoes</span></p>
+                            <p><span class="nt">{10 posições} = complemento end paciente 10 posicoes</span></p>
+                            <p><span class="nt">13  {5 posições no total} = numero end paciente 5 posicoes</span></p>
+                            <p><span class="nt">JARDIM MATARAZZO              = bairro com 30 posicoes</span></p>
+                            <p><span class="nt">1173243475 = telefone paciente com 11 posicoes</span></p>
+                            <p><span class="nt">{40 posições} = email com 40 posicoes</span></p>
                         </div>
                     </div>
                 </div>
